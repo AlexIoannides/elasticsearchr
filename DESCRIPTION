@@ -1,0 +1,23 @@
+Package: elasticr
+Type: Package
+Title: Functions for usung Elasticsearch from R
+Version: 0.1
+Date: 2015-03-13
+Author: Alex Ioannides
+Maintainer: Alex Ioanndies <alex.ioannides@yahoo.co.ukt>
+Description: The purpose of these functions are help the user interact with Elasticsearch from R, without haveing to specify any queries,
+    filters, or aggregations using the JSON-based RESTful API. Instead, we have wrapped the API to created the ability to use it using a DSL
+    based on lists (with a lot of sugar thrown in). All Elasticsearch CRUD operations proceed via the Elasticsearch's bulk API, so there are
+    not limits on the amount of data that can pass between R and Elasticsearch.
+License: GPL-3
+LazyData: TRUE
+Imports: 
+    dplyr,
+    httr,
+    jsonlite,
+    magrittr,
+    lubridate,
+    stringr
+Suggests: knitr,
+    testthat
+VignetteBuilder: knitr
