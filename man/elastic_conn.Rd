@@ -2,24 +2,27 @@
 % Please edit documentation in R/elastic_functions.R
 \name{elastic_conn}
 \alias{elastic_conn}
-\title{Define a 'connection' to an Elasticsearch server}
+\title{Define a 'connection' to an Elasticsearch server and test it.}
 \usage{
-elastic_conn(url = "http://localhost:9200", index = "", type = "")
+elastic_conn(url = "http://localhost:9200", index = "", type = "",
+  test_rescource = FALSE)
 }
 \arguments{
-\item{url}{Location of the Elasticsearch serves that contains the index and type we're interestd in working with.}
+\item{url}{location of the Elasticsearch server that contains the index and type we're interestd in working with (defaults to expected local machine port 9200)}
 
-\item{index}{Name of the index we want to work with.}
+\item{index}{name of the index we want to work with.}
 
-\item{type}{Name of the type we want to work with (optional).}
+\item{type}{name of the type we want to work with (optional).}
+
+\item{test_rescource}{should the Elasticsearch server be pinged at the specified index and type?}
 }
 \value{
-A list containing the the location of the Elasticsearch server, the index and type (option) that we want to work with (as well as the index/type path).
+A list containing the the location of the Elasticsearch server, the index and type that we want to work with (as well as the index/type path combined).
 }
 \description{
-Define a 'connection' to an Elasticsearch server
+Define a 'connection' to an Elasticsearch server and test it.
 }
 \examples{
-elastic_conn('http://localhost:9200', 'analytics', 'users')
+elastic_conn('http://localhost:9200', 'my_index', 'my_type', TRUE)
 }
 

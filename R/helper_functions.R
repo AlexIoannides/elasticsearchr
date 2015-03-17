@@ -4,16 +4,17 @@
 # helper_list_to_json
 # helper_create_query_json
 
-helper_bulk_create_metadata_json <- function ( action_df, metadata_df = NULL ) {
-  if ( is.null( metadata_df ) ) {
-    json_metadata <- paste0( '{"', action_df[[1]], '": {}}' )
+helper_bulk_create_metadata_json <- function (action_df, metadata_df = NULL) {
+  if (is.null(metadata_df)) {
+    json_metadata <- paste0('{"', action_df[[1]], '":{}}')
   } else {
-    tags_metadata <- colnames( metadata_df )
-    json_metadata <- paste0( '{"', action_df[[1]], '": {' )
-    for ( tag in tags_metadata ) {
-      json_metadata <- paste0( json_metadata, '"', tag, '": ', '"', metadata_df[[tag]], '", ' )
+    tags_metadata <- colnames(metadata_df)
+    json_metadata <- paste0('{"', action_df[[1]], '":{')
+    for (tag in tags_metadata) {
+      tag_checked <- if (stringr::str_sub(tag, 1, 1) == '_') tag else paste0('_', tag)
+      json_metadata <- paste0(json_metadata, '"', tag_checked, '":', '"', metadata_df[[tag]], '",')
     }
-    json_metadata <- paste0( str_sub( json_metadata, 1, str_length( json_metadata ) - 2 ), '}}' )
+    json_metadata <- paste0(stringr::str_sub(json_metadata, 1, stringr::str_length(json_metadata) - 1), '}}')
   }
   json_metadata
 }

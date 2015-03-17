@@ -1,4 +1,4 @@
-Package: elasticr
+Package: elasticsearchr
 Type: Package
 Title: Functions for usung Elasticsearch from R
 Version: 0.1
@@ -11,7 +11,7 @@ Description: The purpose of these functions are help the user interact with Elas
     not limits on the amount of data that can pass between R and Elasticsearch.
 License: GPL-3
 LazyData: TRUE
-Imports: 
+Imports:
     dplyr,
     httr,
     jsonlite,
