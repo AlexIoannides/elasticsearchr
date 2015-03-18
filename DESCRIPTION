@@ -18,6 +18,7 @@ Imports:
     magrittr,
     lubridate,
     stringr
-Suggests: knitr,
+Suggests:
+    knitr,
     testthat
 VignetteBuilder: knitr

@@ -1,11 +1,12 @@
-#' elasticr: A package for making working with Elasticsearch easy from R.
+#' elasticsearchr: A package for making working with Elasticsearch easy from R.
 #'
-#' @section elasticr functions:
+#' @section elasticsearchr functions:
 #' elastic_conn
 #'
 #' @docType package
-#' @name elasticr
+#' @name elasticsearchr
 NULL
+
 
 #' Define a 'connection' to an Elasticsearch server and test it.
 #'
@@ -45,6 +46,7 @@ elastic_conn <- function (url = 'http://localhost:9200', index = '', type = '', 
   list(elastic_url = url, elastic_index = index, elastic_type = type, elastic_index_type = index_and_type)
 }
 
+
 #' Create a valid Elasticsearch date-based index name.
 #'
 #' @export
@@ -69,6 +71,7 @@ elastic_create_dated_index_name <- function(elastic_index_name, date) {
   paste0(elastic_index_name, '-', date_only)
 }
 
+
 #' Facilitate interaction with Elasticsearch's bulk API for CRUD operations.
 #'
 #' Elasticsearch's bulk API can be awkward to use directly due to it's peculiar format. However, it remains the only way to interact with Elasticsearch
@@ -82,22 +85,28 @@ elastic_create_dated_index_name <- function(elastic_index_name, date) {
 #'
 #' @export
 #'
-#' @param elastic_conn connection details for the Elasticsearch server we want to access (and optionally the index and type too).
+#' @param elasticsearch connection details for the Elasticsearch server we want to access (and optionally the index and type too).
 #' @param action one of 'index', 'update' or 'delete'.
 #' @param data data.frame object with multiple columns representing document field values.
 #' @param metadata data.frame object containing document metadata (index, type, id). If omitted (or NULL), then documents will automatically be indexed (i.e. created).
 #' @return \code{elastic_bulk}: TRUE or FALSE depending on the success of the http request.
-elastic_bulk <- function(elastic_conn, action, data, metadata = NULL) {
+elastic_bulk <- function(elasticsearch, action, data, metadata = NULL) {
   bulk_data_file_name <- elastic_bulk_file(action, data, metadata)
-  request <- httr::PUT(url = elastic_conn$elastic_url, path = paste0(elastic_conn$elastic_index_type, '/_bulk'), body = httr::upload_file(bulk_data_file_name))
+
+  request <- httr::PUT(url = elasticsearch$elastic_url,
+                       path = paste0(elasticsearch$elastic_index_type, '/_bulk'),
+                       body = httr::upload_file(bulk_data_file_name))
+
   closeAllConnections()
   file.remove(bulk_data_file_name)
+
   if (httr::status_code(request) == 200) {
     return(TRUE)
   } else {
     return(FALSE)
   }
 }
+
 
 #' @describeIn elastic_bulk
 #' @param file_name the name and path (relative to the working directory), of the text file that will be produced. If NULL then a temporary file will be produced.
@@ -170,126 +179,236 @@ elastic_bulk_file <- function(action, data = NULL, metadata = NULL, file_name = 
   return(file_name)
 }
 
+
 #' @describeIn elastic_bulk
 #' @param num_pieces the number of pieces to break the input data into.
 #' @return \code{elastic_bulk_batched}: TRUE or FALSE depending on the success of all http requests made to the bulk API.
-elastic_bulk_index_batch <- function(elastic_conn, data, num_pieces = 1) {
+elastic_bulk_index_batch <- function(elasticsearch, data, num_pieces = 1) {
   stopifnot(nrow(data) >= num_pieces)
-  requests = lapply( X = split(data, rep(1:num_pieces, each = ceiling(nrow(data) / num_pieces))), FUN = function (x) { elastic_bulk(elastic_conn, 'index', x) } )
+  requests = lapply( X = split(data, rep(1:num_pieces, each = ceiling(nrow(data) / num_pieces))), FUN = function (x) { elastic_bulk(elasticsearch, 'index', x) } )
   return(all(unlist(requests)))
 }
 
 
-# elastic_bulk_reingest <- function ( elastic_conn, mapping = '' ) {
-#
-#   # initiate a scroll search for all documents (this will persist after deletion)
-#   scroll_filter <- '{"query": {"match_all": {} } }'
-#   scroll_id <- content( POST( elastic_conn$elastic_url, path = paste( elastic_conn$elastic_index, '_search?scroll=1m&search_type=scan&size=2000', sep = '/'), body = scroll_filter ) )$`_scroll_id`
-#
-#   # load custom mapping if one was supplied (should review template mappings to make this cleaner/unnecessary)
-#   DELETE( elastic_conn$elastic_url, path = elastic_conn$elastic_index )
-#   if ( mapping != '' ) {
-#     PUT( elastic_conn$elastic_url, path = elastic_conn$elastic_index, body = mapping )
-#   }
-#
-#   # keep retreiving data from the scroll search and uploading each batch until there is no more
-#   scroll_response <- POST( elastic_conn$elastic_url, path = '_search/scroll?scroll=10s', body = scroll_id )
-#   scroll_all_data <- fromJSON( content( scroll_response, 'text' ) )$hits$hits
-#   scroll_metadata <- scroll_all_data[, c( '_index', '_type', '_id' )]
-#   scroll_data <- scroll_all_data$`_source`
-#
-#   while ( !is.null( scroll_data ) ) {
-#     # upload data to new index
-#     scroll_metadata <- scroll_all_data[, c( '_index', '_type', '_id' )]
-#     bulk_operations <- bind_cols( data_frame( actions = rep( 'index', nrow( scroll_data ) ) ), scroll_metadata )
-#     elastic_bulk( elastic_conn, bulk_operations['actions'], bulk_operations[, c('_index', '_type', '_id')], scroll_data )
-#
-#     # retreive another page of search results and convert to data frame
-#     scroll_response <- POST( elastic_conn$elastic_url, path = '_search/scroll?scroll=10s', body = scroll_id )
-#     scroll_all_data <- fromJSON( content( scroll_response, 'text' ) )$hits$hits
-#     scroll_data <- scroll_all_data$`_source`
-#   }
-#
-# }
-#
-# elastic_bulk_reingest_split_index <- function ( elastic_conn, timestamp_field, mapping = '' ) {
-#
-#   # get a list of days in the index using an aggregation
-#   agg_days_in_index <- paste0( '{"aggs": {"requests_per_day": {"date_histogram": {"field": "', timestamp_field, '", "interval": "day"} } } }' )
-#   data_days_count <- fromJSON( content( POST( elastic_conn$elastic_url, path = paste( elastic_conn$elastic_index, '_search?search_type=count', sep = '/'), body = agg_days_in_index ), 'text' ) )$aggregations$requests_per_day$buckets
-#
-#   # loop over days returned from aggregation
-#   for ( day in data_days_count$key_as_string ) {
-#     # date/day
-#     current_day <- ymd_hms( day )
-#     next_day <- current_day + days( 1 )
-#
-#     # index name
-#     current_index_name <- paste0( elastic_conn$elastic_index, '-', str_replace_all( as.character( current_day ), '-', '.') )
-#
-#     # create custom mapping if one was supplied (should review template mappings to make this cleaner/unnecessary)
-#     DELETE( elastic_conn$elastic_url, path = current_index_name )
-#     if ( mapping != '' ) {
-#       PUT( elastic_conn$elastic_url, path = current_index_name, body = mapping )
-#     }
-#
-#     # initiate a scroll search for a given date
-#     scroll_filter <- paste0('{"query": {"filtered": {"filter": {"range": {"', timestamp_field, '": {"gte": "', as.character(current_day), '", "lt": "', as.character(next_day), '"} } } } } }')
-#     scroll_id <- content( POST( elastic_conn$elastic_url, path = paste( elastic_conn$elastic_index, '_search?scroll=1m&search_type=scan&size=2000', sep = '/'), body = scroll_filter) )$`_scroll_id`
-#
-#     # keep retreiving data from the scroll search and uploading each batch until there is no more
-#     scroll_response <- POST( elastic_conn$elastic_url, path = '_search/scroll?scroll=5s', body = scroll_id)
-#     scroll_data <- fromJSON( content( scroll_response, 'text' ) )$hits$hits$`_source`
-#
-#     while ( !is.null(scroll_data) ) {
-#       # upload data to new index
-#       bulk_operations <- data_frame( actions = rep( 'index', nrow( scroll_data ) ), `_index` = current_index_name, `_type` = elastic_conn$elastic_type)
-#       elastic_bulk( elastic_conn, bulk_operations['actions'], bulk_operations[, c('_index', '_type')], scroll_data)
-#
-#       # retreive another page of search results and convert to data frame
-#       scroll_response <- POST( elastic_conn$elastic_url, path = '_search/scroll?scroll=5s', body = scroll_id )
-#       scroll_data <- fromJSON( content( scroll_response, 'text') )$hits$hits$`_source`
-#     }
-#
-#   }
-#
-# }
-#
-# elastic_create_new_index <- function( elastic_conn, mapping ) {
-#
-#   # does index exist
-#   index_exists <- if ( status_code( HEAD( elastic_conn$elastic_url, path = elastic_conn$elastic_index ) ) == 404 ) FALSE else TRUE
-#
-#   # if index doesn't exist then create it with the mapping provided
-#   if ( !index_exists ) {
-#     response <- PUT( elastic_conn$elastic_url, path = elastic_conn$elastic_index, body = mapping )
-#     if ( status_code(response) == 200 ) index_exists = FALSE
-#   }
-#
-#   # return whether or not a new index was created
-#   index_exists
-# }
-#
-# elastic_query <- function ( elastic_conn, query_def, to_file = FALSE, file_name = paste0('elastic_query--', Sys.time(), '.csv'), to_file_and_df = FALSE ) {
-#
-#   # create queryDSL json
-#   query_def_json <- helper_list_to_json( query_def )
-#
-#   # run query
-#   helper_search_scroll_retreive_all( elastic_conn, query_def_json, to_file = to_file, file_name = paste0( 'elastic_query--', Sys.time(), '.csv' ), to_file_and_df = to_file_and_df )
-#
-# }
-#
-# elastic_aggregation <- function ( elastic_conn, agg_def, agg_metric, query_def= list('query' = list('match_all' = list() ) ) ) {
-#
-#   # create full aggregation json (including query component)
-#   agg_json <- helper_create_agg_json( agg_def, agg_metric, query_def )
-#
-#   # execute aggregation
-#   response <- POST( elastic_conn$elastic_url, path = paste0( elastic_conn$elastic_index_type, '/_search?search_type=count' ), body = agg_json )
-#   results <- fromJSON( content( response, "text" ) )$aggregations$agg_time$buckets[, -2]
-#
-#   # format output (map from nested data frame structure to single data_frame) and return
-#   as_data_frame( lapply( results, FUN = unlist, recursive = FALSE ) )
-#
-# }
+#' Re-ingest an index into Elasticsearch with a new mapping.
+#'
+#' Index mappings for existing fields cannot be changed. For example, it is not possible to to change a field from 'analyzed' to 'not_analyzed' once the mapping
+#' for the field has been defined. \code{elastic_bulk_reingest} automates the laborious process of downloading the contents of an index, uploading a revised mapping,
+#' and then re-loading the index.
+#'
+#' @export
+#'
+#' @param elasticsearch connection details for the Elasticsearch server we want to access (and optionally the index and type too).
+#' @param mapping the new mapping to upload prior to re-ingesting the index (must be in raw JSON format as specified by Elasticsearch).
+#' @return TRUE or FALSE depending on the success of the operations.
+elastic_bulk_reingest <- function(elasticsearch, mapping = '') {
+  # initial checks
+  if (!helper_ping_elasticsearch(elasticsearch)) stop("can't touch Elasticserch index and type", call. = FALSE)
+  if (mapping != '') {
+    tryCatch({jsonlite::minify(mapping)}, error = function(e) stop("invalid JSON supplied for mapping", call. = FALSE))
+  }
+
+  # initiate a scroll search for all documents (this will persist after deletion)
+  scroll_filter <- '{"query": {"match_all": {} } }'
+  scroll_id <- httr::content(httr::POST(elasticsearch$elastic_url,
+                                        path = paste(elasticsearch$elastic_index, '_search?scroll=1m&search_type=scan&size=2000', sep = '/'),
+                                        body = scroll_filter))$`_scroll_id`
+
+  # load custom mapping if one was supplied (should review template mappings to make this cleaner/unnecessary)
+  httr::DELETE(elasticsearch$elastic_url, path = elasticsearch$elastic_index)
+  if (mapping != '') {
+    httr::PUT(elasticsearch$elastic_url, path = elasticsearch$elastic_index, body = mapping)
+  }
+
+  # keep retreiving data from the scroll search and uploading each batch until there is no more
+  scroll_response <- httr::POST(elasticsearch$elastic_url, path = '_search/scroll?scroll=10s', body = scroll_id)
+  scroll_all_data <- jsonlite::fromJSON( httr::content(scroll_response, 'text') )$hits$hits
+  scroll_metadata <- scroll_all_data[, c( '_index', '_type', '_id' )]
+  scroll_data <- scroll_all_data$`_source`
+
+  success <- TRUE
+  while (!is.null(scroll_data)) {
+    # upload data to new index
+    scroll_metadata <- scroll_all_data[, c( '_index', '_type', '_id' )]
+    this_success <- elastic_bulk(elasticsearch, 'index',  scroll_data, scroll_metadata[, c('_index', '_type', '_id')])
+    success <- success & this_success
+
+    # retreive another page of search results and convert to data frame
+    scroll_response <- httr::POST(elasticsearch$elastic_url, path = '_search/scroll?scroll=10s', body = scroll_id)
+    scroll_all_data <- jsonlite::fromJSON( httr::content( scroll_response, 'text' ) )$hits$hits
+    scroll_data <- scroll_all_data$`_source`
+  }
+
+  return(success)
+}
+
+
+#' Re-ingest the contents of an Elasticsearch index, into potentially many indices based on the day of a time-stamp field.
+#'
+#' When indices becomes large, index performance begins to deterioriate. This is especially so for logs file data that can contain many millions of documents.
+#' When such an index becomes large it is more efficient to split it into many indices based on a time period (here chosen to be days).
+#' \code{elastic_bulk_reingest_timesplit} takes an index that has become large and potentially unperformant, and splits it into multiple indices based on the day
+#' of a specific timestamp field. The option to supply a non-default mapping is also provided.
+#'
+#' @export
+#'
+#' @param elasticsearch connection details for the Elasticsearch server we want to access (and optionally the index and type too).
+#' @param timestamp_field a timestamp field that will be used to seperate documents into day-based indices.
+#' @param mapping the new mapping to upload prior to re-ingesting the index (must be in raw JSON format as specified by Elasticsearch).
+#' @return TRUE or FALSE depending on the success of the operations.
+elastic_bulk_reingest_timesplit <- function(elasticsearch, timestamp_field, mapping = '') {
+  # initial checks
+  if (!helper_ping_elasticsearch(elasticsearch)) stop("can't touch Elasticserch index and type", call. = FALSE)
+  if (!is.character(timestamp_field)) stop("no timestamp_field specified", call. = FALSE)
+  if (mapping != '') {
+    tryCatch({jsonlite::minify(mapping)}, error = function(e) stop("invalid JSON supplied for mapping", call. = FALSE))
+  }
+
+  # get a list of days in the index using an aggregation
+  agg_days_in_index <- paste0('{"aggs": {"requests_per_day": {"date_histogram": {"field": "', timestamp_field, '", "interval": "day"} } } }')
+  data_days_count <- jsonlite::fromJSON( httr::content( httr::POST(elasticsearch$elastic_url,
+                                                                   path = paste(elasticsearch$elastic_index, '_search?search_type=count', sep = '/'),
+                                                                   body = agg_days_in_index ), 'text' ) )$aggregations$requests_per_day$buckets
+
+  # loop over days returned from aggregation
+  for (day in data_days_count$key_as_string) {
+    # date/day
+    current_day <- lubridate::ymd_hms(day)
+    next_day <- current_day + lubridate::days(1)
+
+    # create time-based index name
+    current_index_name <- paste0(elasticsearch$elastic_index, '-', stringr::str_replace_all(as.character(current_day ), '-', '.'))
+
+    # create custom mapping if one was supplied (should review template mappings to make this cleaner/unnecessary)
+    httr::DELETE(elasticsearch$elastic_url, path = current_index_name)
+    if ( mapping != '' ) {
+      httr::PUT(elasticsearch$elastic_url, path = current_index_name, body = mapping)
+    }
+
+    # initiate a scroll search for a given date
+    scroll_filter <- paste0('{"query": {"filtered": {"filter": {"range": {"',
+                            timestamp_field,
+                            '": {"gte": "', as.character(current_day),
+                            '", "lt": "', as.character(next_day),
+                            '"} } } } } }')
+
+    scroll_id <- httr::content( httr::POST(elasticsearch$elastic_url,
+                                           path = paste(elasticsearch$elastic_index, '_search?scroll=1m&search_type=scan&size=2000', sep = '/'),
+                                           body = scroll_filter) )$`_scroll_id`
+
+    # keep retreiving data from the scroll search and uploading each batch until there is no more
+    scroll_response <- httr::POST(elasticsearch$elastic_url, path = '_search/scroll?scroll=5s', body = scroll_id)
+    scroll_data <- jsonlite::fromJSON( httr::content(scroll_response, 'text') )$hits$hits$`_source`
+
+    success <- TRUE
+    while (!is.null(scroll_data)) {
+      # upload data to new index
+      bulk_metadata <- data.frame(index = rep(current_index_name, nrow(scroll_data)), type = rep(elasticsearch$elastic_type, nrow(scroll_data)))
+      this_success <- elastic_bulk( elastic_conn(elasticsearch$elastic_url), 'index', scroll_data, bulk_metadata )
+      success <- success & this_success
+
+      # retreive another page of search results and convert to data frame
+      scroll_response <- httr::POST(elasticsearch$elastic_url, path = '_search/scroll?scroll=5s', body = scroll_id)
+      scroll_data <- jsonlite::fromJSON( httr::content(scroll_response, 'text') )$hits$hits$`_source`
+    }
+  }
+
+  return(success)
+}
+
+
+#' Create a new index.
+#'
+#' @export
+#'
+#' @param elasticsearch connection details for the Elasticsearch server we want to access (and optionally the index and type too).
+#' @param mapping optional mapping to upload (must be in raw JSON format as specified by Elasticsearch).
+#' @return TRUE or FALSE depending on the success of the operations.
+elastic_create_new_index <- function(elasticsearch, mapping = '') {
+  # initial checks
+  if (!helper_ping_elasticsearch( elastic_conn(elasticsearch$elastic_url) )) stop("can't touch Elasticsearch server", call. = FALSE)
+  if (mapping != '') {
+    tryCatch({jsonlite::minify(mapping)}, error = function(e) stop("invalid JSON supplied for mapping", call. = FALSE))
+  }
+
+  index_exists <- if (httr::status_code( httr::HEAD(elasticsearch$elastic_url, path = elasticsearch$elastic_index) ) == 404 ) FALSE else TRUE
+  if ( !index_exists ) {
+    if (mapping != '') {
+      response <- httr::PUT(elasticsearch$elastic_url, path = elasticsearch$elastic_index, body = mapping)
+    } else {
+      response <- httr::PUT(elasticsearch$elastic_url, path = elasticsearch$elastic_index)
+    }
+
+    if (httr::status_code(response) == 200) index_exists = TRUE
+  }
+
+  index_exists
+}
+
+
+#' Execute a simple query (or filter) and return the results in a data frame or CSV file.
+#'
+#' This is experimental. Currently, there is support for combining one query with one filter. Multiple filters and queries will come in a later version.
+#'
+#' @export
+#'
+#' @param elasticsearch connection details for the Elasticsearch server we want to access (and optionally the index and type too).
+#' @param query_def query/filter definition using nested list structure.
+#' @param to_file write the result to a CSV file instead of a data frame?
+#' @param file_name if \code{to_file = TRUE} then a file name can be supplied.
+#' @param to_file_and_df return a data frame as well as a CSV file?
+#' @return data frame of query results or NULL.
+#' @examples
+#' \dontrun{
+#' elastic_query(elastic_conn_(...), query_def = list('filter' = list('range' = list("Tt" = list("gt"=2000)))) )
+#'
+#' query = list('query' = list('term' = list("status_code"="404")), 'filter' = list('range' = list("feconn" = list("gt"=30))))
+#' elastic_query(elastic_conn_(...), query)
+#' }
+elastic_query <- function(elasticsearch, query_def, to_file = FALSE, file_name = paste0('elastic_query--', Sys.time(), '.csv'), to_file_and_df = FALSE) {
+
+  # create queryDSL json
+  query_def_json <- helper_list_to_json(query_def)
+
+  # run query
+  helper_search_scroll_retreive_all(elasticsearch,
+                                    query_def_json,
+                                    to_file = to_file,
+                                    file_name = paste0( 'elastic_query--', Sys.time(), '.csv' ),
+                                    to_file_and_df = to_file_and_df)
+}
+
+
+#' Execute a simple aggregation and return the results in a data frame.
+#'
+#' This is experimental and only supports a single pre-aggregation query.
+#'
+#' @export
+#'
+#' @param elasticsearch connection details for the Elasticsearch server we want to access (and optionally the index and type too).
+#' @param agg_def aggregation definition using nested list structure.
+#' @param agg_metric the metrics we are interested in computing.
+#' @param query_def query/filter definition using nested list structure.
+#' @return data frame of aggregation results.
+#' @examples
+#' \dontrun{
+#' time_buckets <- list('agg_time' = list('date_histogram' = list('field' = 'accept_date', 'interval' = 'hour' )))
+#' avg_and_max_responses <- list( 'avg_response' = list('avg' = list('field' = 'Tt')), 'max_response' = list('max' = list('field' = 'Tt')) )
+#'
+#' elastic_aggregation(elastic_conn(...), time_buckets, avg_and_max_responses)
+#' }
+elastic_aggregation <- function (elasticsearch, agg_def, agg_metric, query_def = list('query' = list('match_all' = list())) ) {
+
+  # create full aggregation json (including query component)
+  agg_json <- helper_create_agg_json(agg_def, agg_metric, query_def)
+
+  # execute aggregation
+  response <- httr::POST(elasticsearch$elastic_url,
+                         path = paste0(elasticsearch$elastic_index_type, '/_search?search_type=count' ),
+                         body = agg_json)
+
+  results <- jsonlite::fromJSON( httr::content( response, "text" ) )$aggregations$agg_time$buckets[, -2]
+
+  # format output (map from nested data frame structure to single data_frame) and return
+  dplyr::as_data_frame( lapply(results, FUN = unlist, recursive = FALSE) )
+}

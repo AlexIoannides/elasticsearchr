@@ -1,4 +1,4 @@
-context('elastic_function')
+context('elastic_functions')
 
 test_that('elastic_conn produces a valid list object with valid Elasticsearch details', {
   expect_is(elastic_conn('http://localhost:9200', 'wine', 'tag_data', FALSE), 'list')

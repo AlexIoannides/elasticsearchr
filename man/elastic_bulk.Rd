@@ -6,14 +6,14 @@
 \alias{elastic_bulk_index_batch}
 \title{Facilitate interaction with Elasticsearch's bulk API for CRUD operations.}
 \usage{
-elastic_bulk(elastic_conn, action, data, metadata = NULL)
+elastic_bulk(elasticsearch, action, data, metadata = NULL)
 
 elastic_bulk_file(action, data = NULL, metadata = NULL, file_name = NULL)
 
-elastic_bulk_index_batch(elastic_conn, data, num_pieces = 1)
+elastic_bulk_index_batch(elasticsearch, data, num_pieces = 1)
 }
 \arguments{
-\item{elastic_conn}{connection details for the Elasticsearch server we want to access (and optionally the index and type too).}
+\item{elasticsearch}{connection details for the Elasticsearch server we want to access (and optionally the index and type too).}
 
 \item{action}{one of 'index', 'update' or 'delete'.}
 

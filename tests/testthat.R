@@ -1,4 +1,4 @@
 library(testthat)
-library(elasticr)
+library(elasticsearchr)
 
-test_check("elasticr")
+test_check("elasticsearchr")
