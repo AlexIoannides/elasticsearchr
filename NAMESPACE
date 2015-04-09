@@ -2,6 +2,8 @@
 
 export(elastic_aggregation)
 export(elastic_bulk)
+export(elastic_bulk_file)
+export(elastic_bulk_index_batch)
 export(elastic_bulk_reingest)
 export(elastic_bulk_reingest_timesplit)
 export(elastic_conn)

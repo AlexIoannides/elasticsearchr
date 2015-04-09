@@ -109,6 +109,9 @@ elastic_bulk <- function(elasticsearch, action, data, metadata = NULL) {
 
 
 #' @describeIn elastic_bulk
+#'
+#' @export
+#'
 #' @param file_name the name and path (relative to the working directory), of the text file that will be produced. If NULL then a temporary file will be produced.
 #' @return \code{elastic_bulk_file}: a string with the relative path and name of the text file containing the data ready to be uploaded to the Elasticsearch bulk API.
 elastic_bulk_file <- function(action, data = NULL, metadata = NULL, file_name = NULL) {
@@ -181,6 +184,9 @@ elastic_bulk_file <- function(action, data = NULL, metadata = NULL, file_name = 
 
 
 #' @describeIn elastic_bulk
+#'
+#' @export
+#'
 #' @param num_pieces the number of pieces to break the input data into.
 #' @return \code{elastic_bulk_batched}: TRUE or FALSE depending on the success of all http requests made to the bulk API.
 elastic_bulk_index_batch <- function(elasticsearch, data, num_pieces = 1) {
