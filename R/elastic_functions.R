@@ -161,7 +161,7 @@ elastic_bulk_file <- function(action, data = NULL, metadata = NULL, file_name = 
 
   if (action != 'delete') {
     # stream data converted to bulk JSON format to a temporary file where each JSON line can then be re-read as the single element of a character vector
-    jsonlite::stream_out(data, temp_con_1 <- file(temp_file_name_1 <- tempfile()), POSIXt="ISO8601", pagesize = 1000, verbose = FALSE)
+    jsonlite::stream_out(data, temp_con_1 <- file(temp_file_name_1 <- tempfile()), POSIXt="ISO8601", pagesize = 1000, verbose = FALSE, digits = 8)
     json_data <- readLines(temp_file_name_1)
     file.remove(temp_file_name_1)
 
