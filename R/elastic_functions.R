@@ -416,5 +416,5 @@ elastic_aggregation <- function (elasticsearch, agg_def, agg_metric, query_def =
   results <- jsonlite::fromJSON( httr::content( response, "text" ) )$aggregations$agg_time$buckets[, -2]
 
   # return
-  dplyr::as_data_frame(results)
+  dplyr::tbl_df(results)
 }
