@@ -413,8 +413,8 @@ elastic_aggregation <- function (elasticsearch, agg_def, agg_metric, query_def =
                          path = paste0(elasticsearch$elastic_index_type, '/_search?search_type=count' ),
                          body = agg_json)
 
-  results <- jsonlite::fromJSON( httr::content( response, "text" ) )$aggregations$agg_time$buckets[, -2]
+  results <- jsonlite::fromJSON( httr::content( response, "text" ) , flatten = TRUE)$aggregations$agg_time$buckets[, -2]
 
-  # return
-  dplyr::tbl_df(results)
+  # format output (map from nested data frame structure to single data_frame) and return
+  dplyr::as_data_frame( lapply(results, FUN = unlist, recursive = FALSE) )
 }
