@@ -135,12 +135,18 @@ print.elastic_api <- function(x) {
 `%>>%.elastic` <- function(api_url, api_args) {
   stopifnot(is_elastic_url(api_url) & is_elastic_api(api_args))
   api_call_payload <- paste0('{', api_args$api_call, '}')
-  response <- httr::POST(api_url$elastic_cluster_url, body = api_call_payload)
-  parsed_response <- jsonlite::fromJSON(httr::content(response, as = 'text'))
 
+  response <- httr::POST(api_url$elastic_cluster_url, body = api_call_payload)
+  if (httr::status_code(response) != 200) {
+    stop(paste0("response from server: ", httr::status_code(response)))
+  }
+
+  parsed_response <- jsonlite::fromJSON(httr::content(response, as = 'text'))
   if (is_elastic_aggs(api_args)) {
+    if (length(parsed_response$aggregations[[1]]$buckets) == 0) stop("empty response to request")
     return_data <- jsonlite::flatten(parsed_response$aggregations[[1]]$buckets)
   } else if (is_elastic_query(api_args)) {
+    if (length(parsed_response$hits$hits$`_source`) == 0) stop("empty response to request")
     return_data <- jsonlite::flatten(parsed_response$hits$hits$`_source`)
   }
 
@@ -149,18 +155,18 @@ print.elastic_api <- function(x) {
 
 
 # ---- test classes and methods ----
-# s <- search("http://localhost:9200", "lp", "bids")
-# q <- query('{"match_all": {}}')
-# a <- aggs('{"max_bid_per_listing": { "terms": {"field": "listing.id", "size": 10, "order": [{"max_bid": "desc"}]}, "aggs": {"max_bid": {"max": {"field": "bid_details.amount"}}} }}')
-#
-# print(q)
-# out_1 <- s %>>% q
-#
-# print(a)
-# out_2 <- s %>>% a
-#
-# print(q + a)
-# out_3 <- s %>>% (q + a)
+s <- search("http://localhost:9200", "lp", "bids")
+q <- query('{"match_all": {}}')
+a <- aggs('{"max_bid_per_listing": { "terms": {"field": "listing.id", "size": 10, "order": [{"max_bid": "desc"}]}, "aggs": {"max_bid": {"max": {"field": "bid_details.amount"}}} }}')
+
+print(q)
+out_1 <- s %>>% q
+
+print(a)
+out_2 <- s %>>% a
+
+print(q + a)
+out_3 <- s %>>% (q + a)
 
 
 # ---- testing stuff as inspired from Advanced R and ggplot2 ----
