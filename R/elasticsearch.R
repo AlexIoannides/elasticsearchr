@@ -26,16 +26,6 @@ is_elastic_query <- function(x) inherits(x, "elastic_query")
 is_elastic_aggs <- function(x) inherits(x, "elastic_aggs")
 
 
-index <- function(docs_data_frame) {
-
-}
-
-
-delete <- function(doc_ids) {
-
-}
-
-
 #' Title
 #'
 #' @param cluster_url
@@ -56,7 +46,47 @@ search <- function(cluster_url, index, doc_type = NULL) {
     valid_cluster_url <- paste(cluster_url, index, doc_type, "_search", sep = "/")
   }
 
-  structure(list("elastic_cluster_url" = valid_cluster_url), class = c("elastic", "elastic_url"))
+  structure(list("elastic_cluster_url" = valid_cluster_url, "cluster_url" = cluster_url,
+                 "index" = index, "doc_type" = doc_type), class = c("elastic", "elastic_url"))
+}
+
+
+`%index%` <- function(search, docs) UseMethod("%index%")
+
+`%index%` <- function(search, df) {
+  stopifnot(is_elastic_url(search) & is.data.frame(df))
+  colnames(df) <- cleaned_field_names(colnames(df))
+  has_ids <- "id" %in% colnames(df)
+  num_docs <- nrow(df)
+
+  if (has_ids) {
+    metadata <- create_metadata("index", search$index, search$doc_type, df$id)
+  } else {
+    metadata_json <- create_metadata("index", search$index, search$doc_type)
+    metadata <- rep(metadata_json, num_docs)
+  }
+
+  bulk_data_file <- create_bulk_upload_file(metadata, df)
+
+  response <- httr::PUT(url = search$cluster_url,
+                       path = "/_bulk",
+                       body = httr::upload_file(bulk_data_file))
+
+  file.remove(bulk_data_file)
+
+  if (httr::status_code(response) == 200 & !httr::content(response)$errors) {
+    "data successfully index"
+  } else if (httr::content(response)$errors) {
+    messages <- httr::content(response)$items
+    warning(jsonlite::prettify(httr::content(response, as = "text")))
+  } else {
+    stop("invalid request")
+  }
+}
+
+
+delete <- function(doc_ids) {
+
 }
 
 
@@ -155,18 +185,20 @@ print.elastic_api <- function(x) {
 
 
 # ---- test classes and methods ----
-s <- search("http://localhost:9200", "lp", "bids")
+s <- search("http://localhost:9200", "iris", "data")
+s %index% iris
+
 q <- query('{"match_all": {}}')
-a <- aggs('{"max_bid_per_listing": { "terms": {"field": "listing.id", "size": 10, "order": [{"max_bid": "desc"}]}, "aggs": {"max_bid": {"max": {"field": "bid_details.amount"}}} }}')
+a <- aggs('{"avg_sepal_width_per_cat": { "terms": {"field": "species", "size": 0, "order": [{"avg_sepal_width": "desc"}]}, "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}} }}')
 
 print(q)
-out_1 <- s %>>% q
+s %>>% q
 
 print(a)
-out_2 <- s %>>% a
+s %>>% a
 
 print(q + a)
-out_3 <- s %>>% (q + a)
+s %>>% (q + a)
 
 
 # ---- testing stuff as inspired from Advanced R and ggplot2 ----
