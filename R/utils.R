@@ -80,6 +80,13 @@ create_bulk_upload_file <- function(metadata, df) {
 }
 
 
+create_bulk_delete_file <- function(metadata) {
+  writeLines(metadata, file(temp_filename <- tempfile()))
+  closeAllConnections()
+  temp_filename
+}
+
+
 #' Title
 #'
 #' @param rescource
@@ -96,18 +103,27 @@ from_size_search <- function(rescource, api_call_payload) {
 
   parsed_response <- jsonlite::fromJSON(httr::content(response, as = 'text'))
   if ("aggregations" %in% names(parsed_response)) {
-    if (length(parsed_response$aggregations[[1]]$buckets) == 0) stop("empty response to request")
-    return_data <- jsonlite::flatten(parsed_response$aggregations[[1]]$buckets)
+    return_data <- extract_aggs_results(response)
+    if (length(return_data) == 0) stop("empty response to request")
   } else {
-    if (length(parsed_response$hits$hits$`_source`) == 0) stop("empty response to request")
-    return_data <- jsonlite::flatten(parsed_response$hits$hits$`_source`)
+    return_data <- extract_query_results(response)
+    if (length(return_data) == 0) stop("empty response to request")
   }
 
   return_data
 }
 
 
-scroll_search <- function(rescource, api_call_payload) {
+#' Title
+#'
+#' @param rescource
+#' @param api_call_payload
+#'
+#' @return
+#' @export
+#'
+#' @examples
+scroll_search <- function(rescource, api_call_payload, extract_function = extract_query_results) {
   scroll_search_url <- paste0(rescource$cluster_url, "/_search/scroll")
   scroll_results <- list()
 
@@ -115,7 +131,7 @@ scroll_search <- function(rescource, api_call_payload) {
   initial_response <- httr::POST(initial_scroll_search_url, body = api_call_payload)
   check_http_code_throw_error(initial_response)
 
-  scroll_results[[1]] <- extract_query_results(initial_response)
+  scroll_results[[1]] <- extract_function(initial_response)
   next_scroll_id <- httr::content(initial_response)$`_scroll_id`
   has_next <- TRUE
   n <- 2
@@ -125,7 +141,7 @@ scroll_search <- function(rescource, api_call_payload) {
     next_response <- httr::POST(scroll_search_url, body = next_api_payload)
     check_http_code_throw_error(next_response)
     if(length(content(next_response)$hits$hits) > 0) {
-      scroll_results[[n]] <- extract_query_results(next_response)
+      scroll_results[[n]] <- extract_function(next_response)
       next_scroll_id <- httr::content(next_response)$`_scroll_id`
       n <- n + 1
     } else {
@@ -137,16 +153,53 @@ scroll_search <- function(rescource, api_call_payload) {
 }
 
 
+#' Title
+#'
+#' @param response
+#'
+#' @return
+#' @export
+#'
+#' @examples
 extract_query_results <- function(response) {
   jsonlite::flatten(jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_source`)
 }
 
 
+#' Title
+#'
+#' @param response
+#'
+#' @return
+#' @export
+#'
+#' @examples
 extract_aggs_results <- function(response) {
   jsonlite::flatten(jsonlite::fromJSON(httr::content(response, as = 'text'))$aggregations[[1]]$buckets)
 }
 
 
+#' Title
+#'
+#' @param response
+#'
+#' @return
+#' @export
+#'
+#' @examples
+extract_id_results <- function(response) {
+  jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_id`
+}
+
+
+#' Title
+#'
+#' @param response
+#'
+#' @return
+#' @export
+#'
+#' @examples
 check_http_code_throw_error <- function(response) {
   if (httr::status_code(response) != 200) {
     stop(paste("Elasticsearch returned a status code of", httr::status_code(response), "\n"),

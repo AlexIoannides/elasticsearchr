@@ -14,6 +14,8 @@ e %search% a
 print(q + a)
 e %search% (q + a)
 
+elastic("http://localhost:9200", "iris", "data") %delete% "approved"
+elastic("http://localhost:9200", "iris") %delete% "approved"
 
 # ---- testing stuff as inspired from Advanced R and ggplot2 ----
 # obj <- function(x) structure(list(x), class = "obj")

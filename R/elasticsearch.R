@@ -47,7 +47,7 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 #' @export
 #'
 #' @examples
-`%index%` <- function(rescource, docs) UseMethod("%index%")
+`%index%` <- function(rescource, df) UseMethod("%index%")
 
 `%index%` <- function(rescource, df) {
   stopifnot(is_elastic_rescource(rescource), is.data.frame(df), !is.null(rescource$doc_type))
@@ -79,8 +79,53 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 }
 
 
-delete <- function(doc_ids) {
+#' Title
+#'
+#' @param rescource
+#' @param approve
+#'
+#' @return
+#' @export
+#'
+#' @examples
+`%delete%` <- function(rescource, approve) UseMethod("%delete%")
 
+`%delete%` <- function(rescource, approve) {
+  if (!is.character(approve)) {
+    ids <- approve
+  } else {
+    if (approve != "approved") stop("please approve deletion") else ids <- NULL
+  }
+
+  if (is.null(ids)) {
+    if (is.null(rescource$doc_type)) {
+      response <- httr::DELETE(paste(rescource$cluster_url, rescource$index, sep = "/"))
+      check_http_code_throw_error(response)
+      print(paste0("... ", rescource$index, " has been deleted"))
+    } else {
+      api_call_payload <- '{"query": {"match_all": {}}}'
+      doc_type_ids <- as.vector(scroll_search(rescource, api_call_payload, extract_id_results))
+      metadata <- create_metadata("delete", rescource$index, rescource$doc_type, doc_type_ids)
+      deletions_file <- create_bulk_delete_file(metadata)
+      response <- httr::PUT(url = rescource$cluster_url,
+                            path = "/_bulk",
+                            body = httr::upload_file(deletions_file))
+
+      file.remove(deletions_file)
+      check_http_code_throw_error(response)
+      print(paste0("... ", rescource$index, "/", rescource$doc_type, " has been deleted"))
+    }
+  } else {
+    metadata <- create_metadata("delete", rescource$index, rescource$doc_type, ids)
+    deletions_file <- create_bulk_delete_file(metadata)
+    response <- httr::PUT(url = rescource$cluster_url,
+                          path = "/_bulk",
+                          body = httr::upload_file(deletions_file))
+
+    file.remove(deletions_file)
+    check_http_code_throw_error(response)
+    print(paste0("... ", paste0(ids, collapse = ", "), " have been deleted"))
+  }
 }
 
 
