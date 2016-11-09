@@ -1,10 +1,24 @@
-#' Title
+# Copyright 2016 Alex Ioannides
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+#' TODO
 #'
 #' @param url
 #'
 #' @return
 #' @export
-#'
 #' @examples
 valid_url <- function(url) {
   TRUE
@@ -80,6 +94,14 @@ create_bulk_upload_file <- function(metadata, df) {
 }
 
 
+#' Title
+#'
+#' @param metadata
+#'
+#' @return
+#' @export
+#'
+#' @examples
 create_bulk_delete_file <- function(metadata) {
   writeLines(metadata, file(temp_filename <- tempfile()))
   closeAllConnections()
@@ -118,6 +140,7 @@ from_size_search <- function(rescource, api_call_payload) {
 #'
 #' @param rescource
 #' @param api_call_payload
+#' @param extract_function
 #'
 #' @return
 #' @export
@@ -162,7 +185,9 @@ scroll_search <- function(rescource, api_call_payload, extract_function = extrac
 #'
 #' @examples
 extract_query_results <- function(response) {
-  jsonlite::flatten(jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_source`)
+  df <- jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_source`
+  if (length(df) == 0) stop("no query results returned")
+  jsonlite::flatten(df)
 }
 
 
@@ -175,7 +200,9 @@ extract_query_results <- function(response) {
 #'
 #' @examples
 extract_aggs_results <- function(response) {
-  jsonlite::flatten(jsonlite::fromJSON(httr::content(response, as = 'text'))$aggregations[[1]]$buckets)
+  df <- jsonlite::fromJSON(httr::content(response, as = 'text'))$aggregations[[1]]$buckets
+  if (length(df) == 0) stop("no aggs results returned")
+  jsonlite::flatten(df)
 }
 
 
@@ -188,7 +215,9 @@ extract_aggs_results <- function(response) {
 #'
 #' @examples
 extract_id_results <- function(response) {
-  jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_id`
+  df <- jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_id`
+  if (length(df) == 0) stop("no ids returned")
+  df
 }
 
 
