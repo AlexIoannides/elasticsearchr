@@ -74,7 +74,7 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
     messages <- httr::content(response)$items
     warning(jsonlite::prettify(httr::content(response, as = "text")))
   } else {
-    stop("invalid request")
+    check_http_code_throw_error(response)
   }
 }
 
@@ -93,7 +93,7 @@ delete <- function(doc_ids) {
 #' @export
 #'
 #' @examples
-query <- function(json, size = 100) {
+query <- function(json, size = 0) {
   stopifnot(jsonlite::validate(json))
   api_call <- paste0('"query":', json)
   structure(list("api_call" = api_call, "size" = size), class = c("elastic", "elastic_api", "elastic_query"))
@@ -161,12 +161,17 @@ print.elastic_api <- function(search) {
   stopifnot(is_elastic_rescource(rescource) & is_elastic_api(search))
 
   if (is_elastic_query(search)) {
-    api_call_payload <- paste0('{"size":', search$size, ', ', search$api_call, '}')
+    if (search$size != 0) {
+      api_call_payload <- paste0('{"size":', search$size, ', ', search$api_call, '}')
+      return(from_size_search(rescource, api_call_payload))
+
+    } else {
+      api_call_payload <- paste0('{"size": 10000', ', ', search$api_call, '}')
+      return(scroll_search(rescource, api_call_payload))
+
+    }
   } else {
     api_call_payload <- paste0('{', search$api_call, '}')
+    return(from_size_search(rescource, api_call_payload))
   }
-
-  return_data <- from_size_search(rescource, api_call_payload)
-
-  return_data
 }
