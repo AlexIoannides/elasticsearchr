@@ -2,14 +2,43 @@
 % Please edit documentation in R/utils.R
 \name{from_size_search}
 \alias{from_size_search}
-\title{Title}
+\title{Execute query with from-size search API.}
 \usage{
 from_size_search(rescource, api_call_payload)
 }
 \arguments{
-\item{api_call_payload}{}
+\item{rescource}{An \code{elastic} rescource object describing on what documents the query is to
+be execured on.}
+
+\item{api_call_payload}{A character string containing the JSON payload that described the query
+to be executed.}
+}
+\value{
+A data.frame of documents returned from the query.
 }
 \description{
-Title
+The from-size search API allows a maximum of 10,000 search results (the maximum 'size') to be
+returned in one call to the API. The 'from' in the name of the API refers to where in the order
+of all qualifying documents (as ordered by their search score), should results start to be
+returned from. Anything larger than 10,000 and the results need to be fetched from using the
+scroll-search API (which is slower as it involves making multiple call-back requests). This API
+is particularly well suited to returning aggregation results.
+}
+\examples{
+elastic_rescource <- elastic("http://localhost:9200", "iris", "data")
+query_json <- '{"query": {"match_all": {}}}'
+results <- from_size_search(elastic_rescource, query_json)
+head(results)
+#   sepal_length sepal_width petal_length petal_width species
+# 1          4.8         3.0          1.4         0.1  setosa
+# 2          4.3         3.0          1.1         0.1  setosa
+# 3          5.8         4.0          1.2         0.2  setosa
+# 4          5.1         3.5          1.4         0.3  setosa
+# 5          5.2         3.5          1.5         0.2  setosa
+# 6          5.2         3.4          1.4         0.2  setosa
+}
+\seealso{
+\url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-from-size.html}
+for more information on the information required by the Elasticsearch from-size API.
 }
 

@@ -2,14 +2,18 @@
 % Please edit documentation in R/utils.R
 \name{check_http_code_throw_error}
 \alias{check_http_code_throw_error}
-\title{Title}
+\title{HTTP response error handling.}
 \usage{
 check_http_code_throw_error(response)
 }
 \arguments{
-\item{response}{}
+\item{response}{An HTTP response from a request to a search API request.}
+}
+\value{
+Exception with prettified JSON response printed to stderr.
 }
 \description{
-Title
+If an HTTP request returns a status code that is not 200, then this functions throws an
+exception and prints the prettified response contents to stderr.
 }
 

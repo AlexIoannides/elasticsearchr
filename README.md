@@ -1,15 +1,15 @@
 [![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr)
 # elasticsearchr
 
-- v0.1.0 - very much a work-in-progress (e.g. no unit-test and incomplete docs), but definitely useable.
+- v0.1.0 - a work-in-progress (e.g. no unit-test), but definitely useable.
 - Elasticsearch v2.3.5
 
-A lightweight API for interacting with Elasticsearch from R. Implements a simple DSL for indexing, deleting, querying and aggregating data using Elasticsearch.
+A lightweight Elasticsearch client for R. Implements a simple DSL for indexing, deleting, querying and aggregating data using Elasticsearch.
 
 ```r
 # ---- test classes and methods ----
 es <- elastic("http://localhost:9200", "iris", "data")
-es %create% mapping_default_alex()
+es %create% mapping_default_simple()
 
 es %index% iris
 

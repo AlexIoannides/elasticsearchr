@@ -2,14 +2,28 @@
 % Please edit documentation in R/utils.R
 \name{cleaned_field_names}
 \alias{cleaned_field_names}
-\title{Title}
+\title{Sanitise column names.}
 \usage{
 cleaned_field_names(colnames)
 }
 \arguments{
-\item{colnames}{}
+\item{colnames}{A character vector containing data frame column names.}
+}
+\value{
+A character vector with 'clean' column names.
 }
 \description{
-Title
+Convert data frame column names into an Elasticsearch compatible format.
+}
+\details{
+Elasticsearch will not ingest field names with periods ("."), such as "Sepal.Width", as these
+are reserved for nested objects (in the JSON sense). This function replaces all period with
+underscores ("_") and the converts everything to lowercase for simplicity.
+}
+\examples{
+df <- iris
+colnames(df) <- cleaned_field_names(colnames(df))
+colnames(df)
+# "sepal_length" "sepal_width"  "petal_length" "petal_width"  "species"
 }
 

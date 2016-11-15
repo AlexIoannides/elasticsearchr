@@ -2,14 +2,25 @@
 % Please edit documentation in R/utils.R
 \name{valid_url}
 \alias{valid_url}
-\title{TODO}
+\title{Validate Elasticsearch URL.}
 \usage{
 valid_url(url)
 }
 \arguments{
-\item{url}{}
+\item{url}{The URL to validate.}
+}
+\value{
+Boolean
 }
 \description{
+Tries to defend against incorrect URLs to Elasticsearch rescources.
+}
+\details{
 TODO
+}
+\examples{
+url <- "http://localhost:9200"
+valid_url(url)
+# TRUE
 }
 

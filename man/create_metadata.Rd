@@ -2,14 +2,37 @@
 % Please edit documentation in R/utils.R
 \name{create_metadata}
 \alias{create_metadata}
-\title{Title}
+\title{Create Bulk API metadata.}
 \usage{
 create_metadata(action, index, doc_type, id = NULL, n = NULL)
 }
 \arguments{
-\item{n}{}
+\item{action}{One of: "index", "create", "update" or "delete".}
+
+\item{index}{The name of the index where the documents reside (or will reside).}
+
+\item{doc_type}{The name of the document type where the documents reside (or will reside).}
+
+\item{id}{[optional] Character vector of document ids.}
+
+\item{n}{[optional] Integer number of repeated metadata description objects that need to be
+returned (if \code{id} is not specified).}
+}
+\value{
+A character vector of Bulk API document information objects.
 }
 \description{
-Title
+The fastest way to index, delete or update many documents, is via the Bulk API. This requires
+that each document have the action combined with the document's metadata (index, type and id)
+sent to the API. This information is encapulated as a JSON object, that this function is
+responsible for generating.
+}
+\examples{
+create_metadata("index", "iris", "data", n = 2)
+'{\\"index\\": {\\"_index\\": \\"iris\\", \\"_type\\": \\"data\\"}}' '{\\"index\\": {\\"_index\\": \\"iris\\", \\"_type\\": \\"data\\"}}'
+}
+\seealso{
+\url{https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html}
+for more information on the information required by the Elasticsearch Bulk API.
 }
 

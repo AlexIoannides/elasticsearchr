@@ -2,15 +2,48 @@
 % Please edit documentation in R/utils.R
 \name{scroll_search}
 \alias{scroll_search}
-\title{Title}
+\title{Execute a query with the scroll-search API.}
 \usage{
 scroll_search(rescource, api_call_payload,
   extract_function = extract_query_results)
 }
 \arguments{
-\item{extract_function}{}
+\item{rescource}{An \code{elastic} rescource object describing on what documents the query is to
+be execured on.}
+
+\item{api_call_payload}{A character string containing the JSON payload that described the query
+to be executed.}
+
+\item{extract_function}{A function to be used for extracting the data from the responses sent
+back from the scroll-search API. Defaults to \code{extract_query_results} that extracts query
+results, for when the scroll-search API is being used for retreiving query results (as opposed
+to aggregations or document ids, etc.).}
+}
+\value{
+A data.frame of documents returned from the query.
 }
 \description{
-Title
+The scroll-search API works by returning a 'token' to the user that allows search results to be
+returned one 'page' at a time. This, large query results (in excess of the 10,000 documents
+maximum size offered by the from-search API) can be retreived by making multiple calls after the
+initial query was sent. Although a slower process end-to-end, this API is particularly well
+suited to returning large query results.
+}
+\examples{
+elastic_rescource <- elastic("http://localhost:9200", "iris", "data")
+query_json <- '{"query": {"match_all": {}}}'
+results <- scroll_search(elastic_rescource, query_json)
+head(results)
+#   sepal_length sepal_width petal_length petal_width species
+# 1          4.8         3.0          1.4         0.1  setosa
+# 2          4.3         3.0          1.1         0.1  setosa
+# 3          5.8         4.0          1.2         0.2  setosa
+# 4          5.1         3.5          1.4         0.3  setosa
+# 5          5.2         3.5          1.5         0.2  setosa
+# 6          5.2         3.4          1.4         0.2  setosa
+}
+\seealso{
+\url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html}
+for more information on the information required by the Elasticsearch scroll-search API.
 }
 

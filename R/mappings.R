@@ -13,13 +13,15 @@
 # limitations under the License.
 
 
-#' Title
+#' A simple Elasticsearch mapping.
 #'
-#' @return
+#' This mapping switches-off the text analyser for all fields of type 'string' (i.e. switches off
+#' free text search), allows all text search to work with case-insensitive lowercase terms, and
+#' maps any field with the name 'timestamp' to type 'date', so long as it has the appropriate
+#' string or long format.
+#'
 #' @export
-#'
-#' @examples
-mapping_default_alex <- function() {
+mapping_default_simple <- function() {
   jsonlite::prettify(
   '{
     "settings": {
