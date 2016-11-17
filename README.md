@@ -25,7 +25,7 @@ $ brew install elasticsearch
 
 And then start it by executing `$ elasticsearch` from within any Terminal window. Successful installation can be checked by navigating any web browser to `http://localhost:9200`, where the following message should greet you (give or take the cluster name that changes with every restart),
 
-```json
+```js
 {
   "name" : "Kraven the Hunter",
   "cluster_name" : "elasticsearch",
@@ -52,7 +52,7 @@ In Elasticsearch a 'row' of data is stored as a 'document'. A document is a [JSO
 
 would be represented as follows using JSON,
 
-```json
+```js
 {
   "sepal_length": 5.1,
   "sepal_width": 3.5,
@@ -224,7 +224,7 @@ I do not have a grand vision for `elasticsearchr` - I want to keep it a lightwei
 A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and `jsonlite` packages that `elasticsearchr` leans upon _heavily_.
 
 
-[esr_img]: https://alexioannides.files.wordpress.com/2016/11/elasticsearchr1.png "Elasticsearchr"
+[esr_img]: http://alexioannides.files.wordpress.com/2016/11/elasticsearchr1.png "Elasticsearchr"
 
 [elastic]: https://www.elastic.co "Elastic corp."
 
