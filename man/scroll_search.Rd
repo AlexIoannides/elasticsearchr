@@ -30,6 +30,7 @@ initial query was sent. Although a slower process end-to-end, this API is partic
 suited to returning large query results.
 }
 \examples{
+\dontrun{
 elastic_rescource <- elastic("http://localhost:9200", "iris", "data")
 query_json <- '{"query": {"match_all": {}}}'
 results <- scroll_search(elastic_rescource, query_json)
@@ -41,6 +42,7 @@ head(results)
 # 4          5.1         3.5          1.4         0.3  setosa
 # 5          5.2         3.5          1.5         0.2  setosa
 # 6          5.2         3.4          1.4         0.2  setosa
+}
 }
 \seealso{
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html}

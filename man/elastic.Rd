@@ -21,6 +21,8 @@ Objects of this class contain all of the information required to locate document
 Elasticsearch cluster.
 }
 \examples{
+\dontrun{
 my_data <- elastic("http://localhost:9200", "iris", "data")
+}
 }
 

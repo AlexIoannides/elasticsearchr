@@ -19,7 +19,9 @@ creation of Elasticsearch indicies with custom mappings. If left unspecified, El
 infer the type of each field based on the first document indexed.
 }
 \examples{
+\dontrun{
 elastic("http://localhost:9200", "iris", "data") \%create\% mapping_default_simple()
+}
 }
 \seealso{
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html}

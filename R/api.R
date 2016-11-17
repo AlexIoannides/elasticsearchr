@@ -56,7 +56,9 @@ is_elastic_aggs <- function(x) inherits(x, "elastic_aggs")
 #' @return An \code{elastic_rescource} object.
 #'
 #' @examples
+#' \dontrun{
 #' my_data <- elastic("http://localhost:9200", "iris", "data")
+#' }
 elastic <- function(cluster_url, index, doc_type = NULL) {
   stopifnot(is.character(cluster_url), is.character(index), is.character(doc_type) | is.null(doc_type),
             valid_url(cluster_url))
@@ -91,7 +93,9 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 #' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html}
 #'
 #' @examples
+#' \dontrun{
 #' elastic("http://localhost:9200", "iris", "data") %index% iris
+#' }
 `%index%` <- function(rescource, df) UseMethod("%index%")
 
 #' @export
@@ -141,7 +145,9 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 #' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html}
 #'
 #' @examples
+#' \dontrun{
 #' elastic("http://localhost:9200", "iris", "data") %create% mapping_default_simple()
+#' }
 `%create%` <- function(rescource, mapping) UseMethod("%create%")
 
 #' @export
@@ -166,7 +172,9 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 #' OR be a vector of document ids if only specific documents need to be deleted.
 #'
 #' @examples
+#' \dontrun{
 #' elastic("http://localhost:9200", "iris", "data") %delete% "approved"
+#' }
 `%delete%` <- function(rescource, approve) UseMethod("%delete%")
 
 #' @export
@@ -299,6 +307,7 @@ print.elastic_api <- function(search) {
 #' @return A data.frame of search or aggregation results.
 #'
 #' @examples
+#' \dontrun{
 #' results <- elastic("http://localhost:9200", "iris", "data") %search% query('{"match_all": {}}')
 #' head(results)
 #' #   sepal_length sepal_width petal_length petal_width species
@@ -308,6 +317,7 @@ print.elastic_api <- function(search) {
 #' # 4          5.1         3.5          1.4         0.3  setosa
 #' # 5          5.2         3.5          1.5         0.2  setosa
 #' # 6          5.2         3.4          1.4         0.2  setosa
+#' }
 `%search%` <- function(rescource, search) UseMethod("%search%")
 
 #' @export

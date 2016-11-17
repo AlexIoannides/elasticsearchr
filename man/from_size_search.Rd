@@ -25,6 +25,7 @@ scroll-search API (which is slower as it involves making multiple call-back requ
 is particularly well suited to returning aggregation results.
 }
 \examples{
+\dontrun{
 elastic_rescource <- elastic("http://localhost:9200", "iris", "data")
 query_json <- '{"query": {"match_all": {}}}'
 results <- from_size_search(elastic_rescource, query_json)
@@ -36,6 +37,7 @@ head(results)
 # 4          5.1         3.5          1.4         0.3  setosa
 # 5          5.2         3.5          1.5         0.2  setosa
 # 6          5.2         3.4          1.4         0.2  setosa
+}
 }
 \seealso{
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-from-size.html}

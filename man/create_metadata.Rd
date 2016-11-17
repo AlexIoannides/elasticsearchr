@@ -28,8 +28,10 @@ sent to the API. This information is encapulated as a JSON object, that this fun
 responsible for generating.
 }
 \examples{
+\dontrun{
 create_metadata("index", "iris", "data", n = 2)
 '{\\"index\\": {\\"_index\\": \\"iris\\", \\"_type\\": \\"data\\"}}' '{\\"index\\": {\\"_index\\": \\"iris\\", \\"_type\\": \\"data\\"}}'
+}
 }
 \seealso{
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html}

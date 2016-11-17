@@ -20,6 +20,7 @@ A data.frame of search or aggregation results.
 Execute query or search.
 }
 \examples{
+\dontrun{
 results <- elastic("http://localhost:9200", "iris", "data") \%search\% query('{"match_all": {}}')
 head(results)
 #   sepal_length sepal_width petal_length petal_width species
@@ -29,5 +30,6 @@ head(results)
 # 4          5.1         3.5          1.4         0.3  setosa
 # 5          5.2         3.5          1.5         0.2  setosa
 # 6          5.2         3.4          1.4         0.2  setosa
+}
 }
 

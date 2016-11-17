@@ -19,6 +19,8 @@ Delete all of the documents within a particular document type (if specified), or
 entire index (if the document type is unspecified.)
 }
 \examples{
+\dontrun{
 elastic("http://localhost:9200", "iris", "data") \%delete\% "approved"
+}
 }
 
