@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr)
 
-- v0.1.0 - a work-in-progress (e.g. no unit-tests), but definitely useable.
+- v0.1.0 - a work-in-progress (e.g. incomplete unit-test coverage), but definitely useable.
 - Currently being built and tested using Elasticsearch v2.3.5
 
 ![Alt][esr_img]
