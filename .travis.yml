@@ -1,2 +1,4 @@
-language: r
 sudo: required
+language: r
+r_packages:
+  - rmarkdown

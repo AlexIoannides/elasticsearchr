@@ -327,7 +327,8 @@ extract_id_results <- function(response) {
 #' @param response An HTTP response from a request to a search API request.
 #' @return Exception with prettified JSON response printed to stderr.
 check_http_code_throw_error <- function(response) {
-  if (httr::status_code(response) != 200) {
+  response_code <- httr::status_code(response)
+  if (!(response_code %in% c(200, 201))) {
     stop(paste("Elasticsearch returned a status code of", httr::status_code(response), "\n"),
          jsonlite::prettify(response))
   }
