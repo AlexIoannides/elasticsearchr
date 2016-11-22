@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr)
 
-- v0.1.0 - a work-in-progress (e.g. no unit-tests), but definitely useable.
+- v0.1.0 - a work-in-progress, but definitely useable.
 - Currently being built and tested using Elasticsearch v2.3.5
 
 ![Alt][esr_img]
@@ -95,19 +95,19 @@ In this example, the `iris` dataset is indexed into the 'iris' index and given a
 Documents can be deleted in three different ways using the `%delete%` operator. Firstly, an entire index (including the mapping information) can be erased by referencing just the index in the resource - e.g.,
 
 ```r
-elastic("http://localhost:9200", "iris") %delete% "approved"
+elastic("http://localhost:9200", "iris") %delete% TRUE
 ```
 
 Alternatively, documents can be deleted on a type-by-type basis leaving the index and it's mappings untouched, by referencing both the index and the document type as the rescource - e.g.,
 
 ```r
-elastic("http://localhost:9200", "iris", "data") %delete% "approved"
+elastic("http://localhost:9200", "iris", "data") %delete% TRUE
 ```
 
 Finally, specific documents can be deleted by referencing their ids directly - e.g.,
 
 ```r
-elastic("http://localhost:9200", "iris", "data") %delete% c(1, 2, 3, 4, 5)
+elastic("http://localhost:9200", "iris", "data") %delete% c("1", "2", "3", "4", "5")
 ```
 
 ### Queries

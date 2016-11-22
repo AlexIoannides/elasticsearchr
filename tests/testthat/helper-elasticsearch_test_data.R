@@ -36,19 +36,45 @@ load_test_data <- function() {
   }
 
   # wait until all 150 documents have been indexed and are ready for searching until returning
+  wait_finish_indexing("http://localhost:9200/iris/data/_search?size=150&q=*", 150)
+
+  TRUE
+}
+
+
+wait_finish_indexing <- function(search_url, results_size) {
   waiting <- TRUE
   start_time <- Sys.time()
   while (waiting) {
-    response <- httr::POST("http://localhost:9200/iris/data/_search?size=150&q=*")
+    response <- httr::POST(search_url)
     available_data <- nrow(jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits)
 
     if (!is.null(available_data)) {
-      if (available_data == 150) {
+      if (available_data == results_size) {
         waiting <- FALSE
       } else {
         running_time <- Sys.time() - start_time
         if (running_time > 60) stop("indexing Elasticsearch test data has time-out")
       }
+    }
+
+  }
+
+  TRUE
+}
+
+
+wait_finish_delete <- function(search_url) {
+  waiting <- TRUE
+  start_time <- Sys.time()
+  while (waiting) {
+    response <- httr::POST(search_url)
+    available_data <- nrow(jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits)
+    if (is.null(available_data)) {
+      waiting <- FALSE
+    } else {
+      running_time <- difftime(Sys.time(), start_time, units = "secs")
+      if (running_time > 30) stop("indexing Elasticsearch test data has time-out")
     }
 
   }

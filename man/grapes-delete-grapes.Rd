@@ -11,8 +11,8 @@ rescource \%delete\% approve
 Elasticsearch cluster, index and document type, where the indexed data will reside. If this does
 not already exist, it will be created automatically.}
 
-\item{approve}{Must be equal to \code{"approved"} for deletion for all documents in a rescource,
-OR be a vector of document ids if only specific documents need to be deleted.}
+\item{approve}{Must be equal to \code{"TRUE"} for deletion for all documents in a rescource,
+OR be a character vector of document ids if only specific documents need to be deleted.}
 }
 \description{
 Delete all of the documents within a particular document type (if specified), or delete an
@@ -20,7 +20,7 @@ entire index (if the document type is unspecified.)
 }
 \examples{
 \dontrun{
-elastic("http://localhost:9200", "iris", "data") \%delete\% "approved"
+elastic("http://localhost:9200", "iris", "data") \%delete\% TRUE
 }
 }
 

@@ -168,21 +168,21 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 #' @param rescource An \code{elastic_rescource} object that contains the information on the
 #' Elasticsearch cluster, index and document type, where the indexed data will reside. If this does
 #' not already exist, it will be created automatically.
-#' @param approve Must be equal to \code{"approved"} for deletion for all documents in a rescource,
-#' OR be a vector of document ids if only specific documents need to be deleted.
+#' @param approve Must be equal to \code{"TRUE"} for deletion for all documents in a rescource,
+#' OR be a character vector of document ids if only specific documents need to be deleted.
 #'
 #' @examples
 #' \dontrun{
-#' elastic("http://localhost:9200", "iris", "data") %delete% "approved"
+#' elastic("http://localhost:9200", "iris", "data") %delete% TRUE
 #' }
 `%delete%` <- function(rescource, approve) UseMethod("%delete%")
 
 #' @export
 `%delete%.elastic_rescource` <- function(rescource, approve) {
-  if (!is.character(approve)) {
+  if (is.character(approve) & is.vector(approve)) {
     ids <- approve
   } else {
-    if (approve != "approved") stop("please approve deletion") else ids <- NULL
+    if (approve != TRUE) stop("please approve deletion") else ids <- NULL
   }
 
   if (is.null(ids)) {
@@ -247,7 +247,10 @@ query <- function(json, size = 0) {
 #' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html}
 #'
 #' @examples
-#' avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {"terms": {"field": "species"}, "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}}')
+#' avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {
+#'       "terms": {"field": "species"},
+#'       "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
+#' }')
 aggs <- function(json) {
   stopifnot(jsonlite::validate(json))
   api_call <- paste0('"aggs":', json)
@@ -270,7 +273,10 @@ aggs <- function(json) {
 #'
 #' @examples
 #' all_docs <- query('{"match_all": {}}')
-#' avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {"terms": {"field": "species"}, "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}}')
+#' avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {
+#'       "terms": {"field": "species"},
+#'       "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
+#' }')
 #' all_docs + avg_sepal_width_per_cat
 `+.elastic_api` <- function(query, aggs) {
   stopifnot((is_elastic_query(query) & is_elastic_aggs(aggs)) | (is_elastic_aggs(query) & is_elastic_query(aggs)))
