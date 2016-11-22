@@ -290,14 +290,15 @@ aggs <- function(json) {
 #'
 #' @export
 #'
-#' @param search \code{elastic_query} or \code{elastic_aggs} object.
+#' @param x \code{elastic_query} or \code{elastic_aggs} object.
+#' @param ... For consitency with all other \code{print} methods.
 #' @return Character string of pretty-printed JSON object.
 #'
 #' @examples
 #' all_docs <- query('{"match_all": {}}')
 #' print(all_docs)
-print.elastic_api <- function(search) {
-  complete_json <- paste0('{', search$api_call, '}')
+print.elastic_api <- function(x, ...) {
+  complete_json <- paste0('{', x$api_call, '}')
   jsonlite::prettify(complete_json)
 }
 

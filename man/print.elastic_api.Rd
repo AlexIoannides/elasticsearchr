@@ -4,10 +4,12 @@
 \alias{print.elastic_api}
 \title{Pretty-print aggs and query JSON objects.}
 \usage{
-\method{print}{elastic_api}(search)
+\method{print}{elastic_api}(x, ...)
 }
 \arguments{
-\item{search}{\code{elastic_query} or \code{elastic_aggs} object.}
+\item{x}{\code{elastic_query} or \code{elastic_aggs} object.}
+
+\item{...}{For consitency with all other \code{print} methods.}
 }
 \value{
 Character string of pretty-printed JSON object.
