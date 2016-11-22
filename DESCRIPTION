@@ -8,7 +8,9 @@ Maintainer: Alex Ioannides <alex.ioannides@perfectchannel.com>
 Description: A lightweight API for interacting with Elasticsearch from R.
     Implements a simple DSL for indexing, deleting, querying and aggregating data
     using Elasticsearch.
-License: Apache License 2.0
+License: file LICENSE
+URL: https://github.com/alexioannides/elasticsearchr
+BugReports: https://github.com/alexioannides/elasticsearchr/issues
 LazyData: TRUE
 Imports:
     httr,

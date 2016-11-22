@@ -30,7 +30,8 @@ responsible for generating.
 \examples{
 \dontrun{
 create_metadata("index", "iris", "data", n = 2)
-'{\\"index\\": {\\"_index\\": \\"iris\\", \\"_type\\": \\"data\\"}}' '{\\"index\\": {\\"_index\\": \\"iris\\", \\"_type\\": \\"data\\"}}'
+'{\\"index\\": {\\"_index\\": \\"iris\\", \\"_type\\": \\"data\\"}}'
+'{\\"index\\": {\\"_index\\": \\"iris\\", \\"_type\\": \\"data\\"}}'
 }
 }
 \seealso{

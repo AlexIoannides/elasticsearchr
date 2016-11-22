@@ -80,7 +80,8 @@ cleaned_field_names <- function(colnames) {
 #' @examples
 #' \dontrun{
 #' create_metadata("index", "iris", "data", n = 2)
-#' '{\"index\": {\"_index\": \"iris\", \"_type\": \"data\"}}' '{\"index\": {\"_index\": \"iris\", \"_type\": \"data\"}}'
+#' '{\"index\": {\"_index\": \"iris\", \"_type\": \"data\"}}'
+#' '{\"index\": {\"_index\": \"iris\", \"_type\": \"data\"}}'
 #' }
 create_metadata <- function(action, index, doc_type, id = NULL, n = NULL) {
   stopifnot(action %in% c("index", "create", "update", "delete"))
