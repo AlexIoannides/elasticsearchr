@@ -4,7 +4,7 @@ Title: A lightweight API for interacting with Elasticsearch from R
 Version: 0.1.0
 Date: 2016-11-28
 Author: Alex Ioannides
-Maintainer: Alex Ioannides <alex.ioannides@perfectchannel.com>
+Maintainer: Alex Ioannides <alex.ioannides@yahoo.co.uk>
 Description: A lightweight API for interacting with Elasticsearch from R.
     Implements a simple DSL for indexing, deleting, querying and aggregating data
     using Elasticsearch.

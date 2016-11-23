@@ -13,6 +13,9 @@
 # limitations under the License.
 
 
+# ---- classes, methods and predicates ------------------------------------------------------------
+
+
 #' elasticsearchr predicate functions.
 #'
 #' Predicate functions for identifying different elasticsearchr object types.
@@ -76,6 +79,69 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
   structure(list("search_url" = valid_cluster_url, "cluster_url" = cluster_url,
                  "index" = index, "doc_type" = doc_type), class = c("elastic_rescource", "elastic"))
 }
+
+
+#' Define Elasticsearch query.
+#'
+#' @export
+#'
+#' @param json JSON object describing the query that needs to be executed.
+#' @param size [optional] The number of documents to return. If left unspecified, then the default
+#' if to return all documents.
+#' @return An \code{elastic_query} object.
+#'
+#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html}
+#'
+#' @examples
+#' all_docs <- query('{"match_all": {}}')
+query <- function(json, size = 0) {
+  stopifnot(valid_json(json))
+  api_call <- paste0('"query":', json)
+  structure(list("api_call" = api_call, "size" = size),
+            class = c("elastic_query", "elastic_api", "elastic"))
+}
+
+
+#' Define Elasticsearch query sort
+#'
+#' @export
+#'
+#' @param json JSON object describing the sorting required on the query results.
+#' @return An \code{elastic_sort} object.
+#'
+#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/5.0/search-request-sort.html}
+#'
+#' @examples
+#' sort_by_key <- sort('[{"sort_key": {"order": "asc"}}]')
+sort <- function(json) {
+  stopifnot(valid_json(json))
+  api_call <- paste0('"sort":', json)
+  structure(list("api_call" = api_call), class = c("elastic_sort", "elastic_api", "elastic"))
+}
+
+
+#' Define Elasticsearch aggregation.
+#'
+#' @export
+#'
+#' @param json JSON object describing the aggregation that needs to be executed.
+#' @return An \code{elastic_aggs} object.
+#'
+#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html}
+#'
+#' @examples
+#' avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {
+#'       "terms": {"field": "species"},
+#'       "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
+#' }')
+aggs <- function(json) {
+  stopifnot(valid_json(json))
+  api_call <- paste0('"aggs":', json)
+  structure(list("api_call" = api_call), class = c("elastic_aggs", "elastic_api", "elastic"))
+}
+
+
+# ---- operators ----------------------------------------------------------------------------------
 
 
 #' Index a data frame.
@@ -221,63 +287,48 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 }
 
 
-#' Define Elasticsearch query.
+#' Execute query or search.
 #'
 #' @export
 #'
-#' @param json JSON object describing the query that needs to be executed.
-#' @param size [optional] The number of documents to return. If left unspecified, then the default
-#' if to return all documents.
-#' @return An \code{elastic_query} object.
-#'
-#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html}
+#' @param rescource An \code{elastic_rescource} object that contains the information on the
+#' Elasticsearch cluster, index and document type, where the indexed data will reside. If this does
+#' not already exist, it will be created automatically.
+#' @param search \code{elastic_query} or \code{elastic_aggs} object.
+#' @return A data.frame of search or aggregation results.
 #'
 #' @examples
-#' all_docs <- query('{"match_all": {}}')
-query <- function(json, size = 0) {
-  stopifnot(valid_json(json))
-  api_call <- paste0('"query":', json)
-  structure(list("api_call" = api_call, "size" = size),
-            class = c("elastic_query", "elastic_api", "elastic"))
-}
+#' \dontrun{
+#' results <- elastic("http://localhost:9200", "iris", "data") %search% query('{"match_all": {}}')
+#' head(results)
+#' #   sepal_length sepal_width petal_length petal_width species
+#' # 1          4.8         3.0          1.4         0.1  setosa
+#' # 2          4.3         3.0          1.1         0.1  setosa
+#' # 3          5.8         4.0          1.2         0.2  setosa
+#' # 4          5.1         3.5          1.4         0.3  setosa
+#' # 5          5.2         3.5          1.5         0.2  setosa
+#' # 6          5.2         3.4          1.4         0.2  setosa
+#' }
+`%search%` <- function(rescource, search) UseMethod("%search%")
 
-
-#' Define Elasticsearch query sort
-#'
 #' @export
-#'
-#' @param json JSON object describing the sorting required on the query results.
-#' @return An \code{elastic_sort} object.
-#'
-#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/5.0/search-request-sort.html}
-#'
-#' @examples
-#' sort_by_key <- sort('[{"sort_key": {"order": "asc"}}]')
-sort <- function(json) {
-  stopifnot(valid_json(json))
-  api_call <- paste0('"sort":', json)
-  structure(list("api_call" = api_call), class = c("elastic_sort", "elastic_api", "elastic"))
-}
+`%search%.elastic` <- function(rescource, search) {
+  stopifnot(is_elastic_rescource(rescource) & is_elastic_api(search))
 
+  if (is_elastic_query(search)) {
+    if (search$size != 0) {
+      api_call_payload <- paste0('{"size":', search$size, ', ', search$api_call, '}')
+      return(from_size_search(rescource, api_call_payload))
 
-#' Define Elasticsearch aggregation.
-#'
-#' @export
-#'
-#' @param json JSON object describing the aggregation that needs to be executed.
-#' @return An \code{elastic_aggs} object.
-#'
-#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html}
-#'
-#' @examples
-#' avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {
-#'       "terms": {"field": "species"},
-#'       "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
-#' }')
-aggs <- function(json) {
-  stopifnot(valid_json(json))
-  api_call <- paste0('"aggs":', json)
-  structure(list("api_call" = api_call), class = c("elastic_aggs", "elastic_api", "elastic"))
+    } else {
+      api_call_payload <- paste0('{"size": 10000', ', ', search$api_call, '}')
+      return(scroll_search(rescource, api_call_payload))
+
+    }
+  } else {
+    api_call_payload <- paste0('{', search$api_call, '}')
+    return(from_size_search(rescource, api_call_payload))
+  }
 }
 
 
@@ -337,49 +388,4 @@ aggs <- function(json) {
 print.elastic_api <- function(x, ...) {
   complete_json <- paste0('{', x$api_call, '}')
   jsonlite::prettify(complete_json)
-}
-
-
-#' Execute query or search.
-#'
-#' @export
-#'
-#' @param rescource An \code{elastic_rescource} object that contains the information on the
-#' Elasticsearch cluster, index and document type, where the indexed data will reside. If this does
-#' not already exist, it will be created automatically.
-#' @param search \code{elastic_query} or \code{elastic_aggs} object.
-#' @return A data.frame of search or aggregation results.
-#'
-#' @examples
-#' \dontrun{
-#' results <- elastic("http://localhost:9200", "iris", "data") %search% query('{"match_all": {}}')
-#' head(results)
-#' #   sepal_length sepal_width petal_length petal_width species
-#' # 1          4.8         3.0          1.4         0.1  setosa
-#' # 2          4.3         3.0          1.1         0.1  setosa
-#' # 3          5.8         4.0          1.2         0.2  setosa
-#' # 4          5.1         3.5          1.4         0.3  setosa
-#' # 5          5.2         3.5          1.5         0.2  setosa
-#' # 6          5.2         3.4          1.4         0.2  setosa
-#' }
-`%search%` <- function(rescource, search) UseMethod("%search%")
-
-#' @export
-`%search%.elastic` <- function(rescource, search) {
-  stopifnot(is_elastic_rescource(rescource) & is_elastic_api(search))
-
-  if (is_elastic_query(search)) {
-    if (search$size != 0) {
-      api_call_payload <- paste0('{"size":', search$size, ', ', search$api_call, '}')
-      return(from_size_search(rescource, api_call_payload))
-
-    } else {
-      api_call_payload <- paste0('{"size": 10000', ', ', search$api_call, '}')
-      return(scroll_search(rescource, api_call_payload))
-
-    }
-  } else {
-    api_call_payload <- paste0('{', search$api_call, '}')
-    return(from_size_search(rescource, api_call_payload))
-  }
 }
