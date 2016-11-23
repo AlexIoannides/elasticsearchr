@@ -6,7 +6,7 @@ Date: 2016-11-28
 Author: Alex Ioannides
 Maintainer: Alex Ioannides <alex.ioannides@yahoo.co.uk>
 Description: A lightweight API for interacting with Elasticsearch from R.
-    Implements a simple DSL for indexing, deleting, querying and aggregating data
+    Implements a simple DSL for indexing, deleting, querying, sorting and aggregating data
     using Elasticsearch.
 License: file LICENSE
 URL: https://github.com/alexioannides/elasticsearchr
