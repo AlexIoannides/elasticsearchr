@@ -13,16 +13,18 @@ valid_url(url)
 Boolean
 }
 \description{
-Tries to defend against incorrect URLs to Elasticsearch rescources.
-}
-\details{
-TODO
+Tries to defend against incorrect URLs to Elasticsearch rescources. Requires that URLs must
+contain the protocol (e.g. 'http') as well an Elasticsearch port number (e.g. ':9200').
 }
 \examples{
 \dontrun{
 url <- "http://localhost:9200"
 valid_url(url)
 # TRUE
+
+url <- "localhost:9200"
+valid_url(url)
+# Error in valid_url(url) : invalid URL to Elasticsearch cluster
 }
 }
 

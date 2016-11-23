@@ -1,7 +1,7 @@
 context('elasticsearchr utils')
 
 
-test_that('valid_url validated URLs to Elasticsearch rescources', {
+test_that('valid_url identifies valid URLs to Elasticsearch rescources', {
   # arrange
   url <- "http://localhost:9200"
 
@@ -10,6 +10,24 @@ test_that('valid_url validated URLs to Elasticsearch rescources', {
 
   # assert
   expect_true(is_valid_url)
+})
+
+
+test_that('valid_url identifies invalid URLs to Elasticsearch rescources - missing protocol', {
+  # arrange
+  url <- "localhost:9200"
+
+  # act & assert
+  expect_error(valid_url(url))
+})
+
+
+test_that('valid_url identifies invalid URLs to Elasticsearch rescources - missing port number', {
+  # arrange
+  url <- "http://localhost"
+
+  # act & assert
+  expect_error(valid_url(url))
 })
 
 

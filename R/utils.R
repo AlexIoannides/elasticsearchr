@@ -15,9 +15,8 @@
 
 #' Validate Elasticsearch URL.
 #'
-#' Tries to defend against incorrect URLs to Elasticsearch rescources.
-#'
-#' TODO
+#' Tries to defend against incorrect URLs to Elasticsearch rescources. Requires that URLs must
+#' contain the protocol (e.g. 'http') as well an Elasticsearch port number (e.g. ':9200').
 #'
 #' @param url The URL to validate.
 #' @return Boolean
@@ -27,9 +26,23 @@
 #' url <- "http://localhost:9200"
 #' valid_url(url)
 #' # TRUE
+#'
+#' url <- "localhost:9200"
+#' valid_url(url)
+#' # Error in valid_url(url) : invalid URL to Elasticsearch cluster
 #' }
 valid_url <- function(url) {
-  TRUE
+  if (endsWith(url, "/")) {
+    url_clean <- tolower(substring(url, 1, nchar(url) - 1))
+  } else {
+    url_clean <- tolower(url)
+  }
+
+  if (grepl("http://", url_clean) & grepl(":[0-9][0-9][0-9][0-9]", url_clean)) {
+    return(TRUE)
+  } else {
+    stop("invalid URL to Elasticsearch cluster")
+  }
 }
 
 
