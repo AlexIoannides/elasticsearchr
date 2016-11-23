@@ -21,9 +21,11 @@ are reserved for nested objects (in the JSON sense). This function replaces all 
 underscores ("_") and the converts everything to lowercase for simplicity.
 }
 \examples{
+\dontrun{
 df <- iris
 colnames(df) <- cleaned_field_names(colnames(df))
 colnames(df)
 # "sepal_length" "sepal_width"  "petal_length" "petal_width"  "species"
+}
 }
 

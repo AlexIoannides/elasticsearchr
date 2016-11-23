@@ -19,8 +19,10 @@ Tries to defend against incorrect URLs to Elasticsearch rescources.
 TODO
 }
 \examples{
+\dontrun{
 url <- "http://localhost:9200"
 valid_url(url)
 # TRUE
+}
 }
 
