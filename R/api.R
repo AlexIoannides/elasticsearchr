@@ -222,7 +222,7 @@ aggs <- function(json) {
 
 #' @export
 `%create%.elastic_rescource` <- function(rescource, mapping) {
-  response <- httr::POST(paste(rescource$cluster_url, rescource$index, sep = "/"), body = mapping)
+  response <- httr::PUT(paste(rescource$cluster_url, rescource$index, sep = "/"), body = mapping)
   check_http_code_throw_error(response)
   message(paste("...", rescource$index, "has been created"))
 }

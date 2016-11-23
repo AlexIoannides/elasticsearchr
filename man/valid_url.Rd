@@ -14,7 +14,8 @@ Boolean
 }
 \description{
 Tries to defend against incorrect URLs to Elasticsearch rescources. Requires that URLs must
-contain the protocol (e.g. 'http') as well an Elasticsearch port number (e.g. ':9200').
+contain the protocol (e.g. 'http') as well an Elasticsearch port number (e.g. ':9200'), and must
+not end in '/'.
 }
 \examples{
 \dontrun{

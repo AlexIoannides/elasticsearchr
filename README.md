@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr)
 
-- v0.1.0 - built and tested using Elasticsearch v2.3.5
+- v0.1.0 - built and tested using Elasticsearch v2.x and v5.x; and,
+- query and aggregation syntax used in the examples below assume that Elasticsearch v2.x is being used.
 
 ![Alt][esr_img]
 
@@ -71,7 +72,7 @@ Although Elasticsearch - like most NoSQL databases - is often referred to as bei
 `elasticsearchr` is a **lightweight** client - by this I mean that it only aims to do 'just enough' work to make using Elasticsearch with R easy and intuitive. You will still need to read the [Elasticsearch documentation][es_docs] to understand how to compose queries and aggregations. What follows is a quick summary of what is possible.
 
 ### Resources
-Elasticsearch resources, as defined by the URLs decribed above, are defined as `elastic` objects in `elasticsearchr`. For example,
+Elasticsearch resources, as defined by the URLs described above, are defined as `elastic` objects in `elasticsearchr`. For example,
 
 ```r
 es <- elastic("http://localhost:9200", "iris", "data")
@@ -97,7 +98,7 @@ Documents can be deleted in three different ways using the `%delete%` operator. 
 elastic("http://localhost:9200", "iris") %delete% TRUE
 ```
 
-Alternatively, documents can be deleted on a type-by-type basis leaving the index and it's mappings untouched, by referencing both the index and the document type as the rescource - e.g.,
+Alternatively, documents can be deleted on a type-by-type basis leaving the index and it's mappings untouched, by referencing both the index and the document type as the resource - e.g.,
 
 ```r
 elastic("http://localhost:9200", "iris", "data") %delete% TRUE
@@ -163,7 +164,7 @@ avg_sepal_width <- aggs('{
   "avg_sepal_width_per_species": {
     "terms": {
       "field": "species",
-      "size": 0
+      "size": 3
     },
     "aggs": {
       "avg_sepal_width": {
@@ -176,7 +177,9 @@ avg_sepal_width <- aggs('{
 }')
 ```
 
-That is also executed via the `%search%` operator on the appropriate resource - e.g.,
+_(Elasticsearch 5.x users please note that when using the out-of-the-box mappings the above aggregation requires that `"field": "species"` be changed to `"field": "species.keyword"` - see [here][es_five_mappings] for more information as to why)_
+
+This aggregation is also executed via the `%search%` operator on the appropriate resource - e.g.,
 
 ```r
 elastic("http://localhost:9200", "iris", "data") %search% avg_sepal_width
@@ -237,10 +240,10 @@ Finally, I have included the ability to create an empty index with a custom mapp
 elastic("http://localhost:9200", "iris") %create% mapping_default_simple()
 ```
 
-Where in this instance `mapping_default_simple()` is a default mapping that I have shipped with `elasticsearchr`. It switches-off the text analyser for all fields of type 'string' (i.e. switches off free text search), allows all text search to work with case-insensitive lowercase terms, and maps any field with the name 'timestamp' to type 'date', so long as it has the appropriate string or long format.
+Where in this instance `mapping_default_simple()` is a default mapping that I have shipped with `elasticsearchr`. It switches-off the text analyser for all fields of type 'string' (i.e. switches off free text search), allows all text search to work with case-insensitive lower-case terms, and maps any field with the name 'timestamp' to type 'date', so long as it has the appropriate string or long format.
 
 ## Forthcoming Attractions
-I do not have a grand vision for `elasticsearchr` - I want to keep it a lightweight client that requires knowledge of Elasticsearch - but I would like to add the ability to compose major query and aggregation types, without having to type-out lots of JSON, and to be able to retreive simple information like the names of all indices in a cluster, and all the document types within an index, etc. Future development will likely be focused in these areas.
+I do not have a grand vision for `elasticsearchr` - I want to keep it a lightweight client that requires knowledge of Elasticsearch - but I would like to add the ability to compose major query and aggregation types, without having to type-out lots of JSON, and to be able to retrieve simple information like the names of all indices in a cluster, and all the document types within an index, etc. Future development will likely be focused in these areas.
 
 ## Acknowledgements
 A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and `jsonlite` packages that `elasticsearchr` leans upon _heavily_.
@@ -273,3 +276,5 @@ A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and
 [json]: https://en.wikipedia.org/wiki/JSON "JSON"
 
 [basic_concepts]: https://www.elastic.co/guide/en/elasticsearch/reference/current/_basic_concepts.html "Basic Concepts"
+
+[es_five_mappings]: https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html "Text fields in Elasticsearch 5.x"

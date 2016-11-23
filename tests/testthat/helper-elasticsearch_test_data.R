@@ -25,6 +25,14 @@ load_test_data <- function() {
   # delete any index called 'iris' on localhost
   response <- httr::DELETE("http://localhost:9200/iris")
 
+  # if testing on Elasticsearch 5.x then ensure fielddata: true as a default mapping for strings
+  if (elastic_version("http://localhost:9200")$major >= 5) {
+    default_iris_mapping <- '{"mappings":{"_default_":{"dynamic_templates":[{"strings":{
+      "match_mapping_type":"string","mapping":{"type":"text","fielddata":true}}}]}}}'
+    response <- httr::PUT("http://localhost:9200/iris", body = default_iris_mapping)
+    check_http_code_throw_error(response)
+  }
+
   # index iris dataset from first principles (i.e. not using the elasticsearchr)
   for (i in 1:150) {
     iris_json_data <- gsub("\\[|\\]", "", jsonlite::toJSON((iris_data[i, ])))

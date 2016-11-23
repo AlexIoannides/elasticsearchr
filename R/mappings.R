@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-#' A simple Elasticsearch mapping.
+#' Simple Elasticsearch default mappings for non-text-search analytics
 #'
 #' This mapping switches-off the text analyser for all fields of type 'string' (i.e. switches off
 #' free text search), allows all text search to work with case-insensitive lowercase terms, and
@@ -60,4 +60,31 @@ mapping_default_simple <- function() {
       }
     }
   }')
+}
+
+
+#' Elasticsearch 5.x default mappings enabling fielddata for text fields
+#'
+#' A default mapping that enables fielddata for all string/text fields in Elasticsearch 5.x.
+#'
+#' @export
+mapping_fielddata_true <- function() {
+  jsonlite::prettify(
+  '{
+    "mappings": {
+      "_default_": {
+        "dynamic_templates": [
+          {
+            "strings": {
+              "match_mapping_type": "string",
+              "mapping": {
+                "type": "text",
+                "fielddata": true
+              }
+            }
+          }
+        ]
+      }
+    }
+}')
 }

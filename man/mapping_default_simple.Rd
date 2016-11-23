@@ -2,7 +2,7 @@
 % Please edit documentation in R/mappings.R
 \name{mapping_default_simple}
 \alias{mapping_default_simple}
-\title{A simple Elasticsearch mapping.}
+\title{Simple Elasticsearch default mappings for non-text-search analytics}
 \usage{
 mapping_default_simple()
 }

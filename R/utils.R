@@ -16,7 +16,8 @@
 #' Validate Elasticsearch URL.
 #'
 #' Tries to defend against incorrect URLs to Elasticsearch rescources. Requires that URLs must
-#' contain the protocol (e.g. 'http') as well an Elasticsearch port number (e.g. ':9200').
+#' contain the protocol (e.g. 'http') as well an Elasticsearch port number (e.g. ':9200'), and must
+#' not end in '/'.
 #'
 #' @param url The URL to validate.
 #' @return Boolean
@@ -32,17 +33,42 @@
 #' # Error in valid_url(url) : invalid URL to Elasticsearch cluster
 #' }
 valid_url <- function(url) {
-  if (endsWith(url, "/")) {
-    url_clean <- tolower(substring(url, 1, nchar(url) - 1))
-  } else {
-    url_clean <- tolower(url)
-  }
-
-  if (grepl("http://", url_clean) & grepl(":[0-9][0-9][0-9][0-9]", url_clean)) {
+  if (grepl("http://", url) & grepl(":[0-9][0-9][0-9][0-9]", url) & !endsWith(url, "/")) {
     return(TRUE)
   } else {
     stop("invalid URL to Elasticsearch cluster")
   }
+}
+
+
+#' Elasticsearch version
+#'
+#' Returns the major, minor and build version numbers for an Elasticsearch cluster, given a valid
+#' URL to an Elasticsearch cluster.
+#'
+#' @param url A valid URL to an Elasticsearch cluster.
+#' @return A list with the \code{major}, \code{minor} and \code{build} numbers.
+#'
+#' @examples
+#' \dontrun{
+#' elastic_version("http://localhost:9200")
+#' $major
+#' [1] 5
+#'
+#' $minor
+#' [1] 0
+#'
+#' $build
+#' [1] 1
+#' }
+elastic_version <- function(url) {
+  valid_url(url)
+  response <- httr::GET(url)
+  check_http_code_throw_error(response)
+  version_string <- httr::content(response)$version$number
+  version <- as.integer(strsplit(version_string, "\\.")[[1]])
+
+  list("major" = version[1], "minor" = version[2], "build" = version[3])
 }
 
 

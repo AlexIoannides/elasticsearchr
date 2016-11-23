@@ -31,6 +31,20 @@ test_that('valid_url identifies invalid URLs to Elasticsearch rescources - missi
 })
 
 
+test_that('elastic_version returns the Elasticsearch version number', {
+  # arrang
+  url <- "http://localhost:9200"
+
+  # act
+  version <- elastic_version(url)
+
+  # assert
+  expect_type(version$major, "integer")
+  expect_type(version$minor, "integer")
+  expect_type(version$build, "integer")
+})
+
+
 test_that('cleaned_field_names removes periods from data.frame column names', {
   # arrange
   iris_colnames <- colnames(iris)
@@ -154,7 +168,7 @@ test_that('from_size_search retrieves aggregation results from Elasticsearch', {
 
   # arrange
   load_test_data()
-  aggs <- '{"aggs": {"avg_sepal_width_per_species":{"terms":{"field":"species","size":0},
+  aggs <- '{"aggs": {"avg_sepal_width_per_species":{"terms":{"field":"species","size":3},
     "aggs":{"avg_sepal_width":{"avg":{"field":"sepal_width"}}}}}}'
 
   # act
