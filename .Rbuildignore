@@ -4,3 +4,4 @@
 .Rprofile
 man-roxygen
 ^README\.Rmd$
+^appveyor\.yml$

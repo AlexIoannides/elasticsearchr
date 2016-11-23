@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr)
+[![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/AlexIoannides/elasticsearchr?branch=master&svg=true)](https://ci.appveyor.com/project/AlexIoannides/elasticsearchr)
 
 - v0.1.0 - built and tested using Elasticsearch v2.x and v5.x; and,
 - query and aggregation syntax used in the examples below assume that Elasticsearch v2.x is being used.
