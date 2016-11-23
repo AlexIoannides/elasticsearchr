@@ -33,6 +33,27 @@ valid_url <- function(url) {
 }
 
 
+#' Valid JSON string predicate function
+#'
+#' @param json Candidate JSON object as a string.
+#' @return Boolean.
+#'
+#' @examples
+#' \dontrun{
+#' good_json <- '{"id": 1}'
+#' valid_json(good_json)
+#' # TRUE
+#'
+#' bad_json <- '{"id": 1a}'
+#' valid_json(bad_json)
+#' # FALSE
+#' }
+valid_json <- function(json) {
+  stopifnot(is.character(json))
+  jsonlite::validate(json)
+}
+
+
 #' Sanitise column names.
 #'
 #' Convert data frame column names into an Elasticsearch compatible format.

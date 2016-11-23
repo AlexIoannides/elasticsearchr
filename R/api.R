@@ -42,6 +42,10 @@ is_elastic_query <- function(x) inherits(x, "elastic_query")
 #' @rdname elastic_predicates
 is_elastic_aggs <- function(x) inherits(x, "elastic_aggs")
 
+#' @export
+#' @rdname elastic_predicates
+is_elastic_sort <- function(x) inherits(x, "elastic_sort")
+
 
 #' elastic_rescource class constructor.
 #'
@@ -119,7 +123,7 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
   file.remove(bulk_data_file)
 
   if (httr::status_code(response) == 200 & !httr::content(response)$errors) {
-    "... data successfully indexed"
+    message("... data successfully indexed")
   } else if (httr::content(response)$errors) {
     messages <- httr::content(response)$items
     warning(jsonlite::prettify(httr::content(response, as = "text")))
@@ -154,7 +158,7 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 `%create%.elastic_rescource` <- function(rescource, mapping) {
   response <- httr::POST(paste(rescource$cluster_url, rescource$index, sep = "/"), body = mapping)
   check_http_code_throw_error(response)
-  print(paste("...", rescource$index, "has been created"))
+  message(paste("...", rescource$index, "has been created"))
 }
 
 
@@ -189,7 +193,7 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
     if (is.null(rescource$doc_type)) {
       response <- httr::DELETE(paste(rescource$cluster_url, rescource$index, sep = "/"))
       check_http_code_throw_error(response)
-      print(paste0("... ", rescource$index, " has been deleted"))
+      message(paste0("... ", rescource$index, " has been deleted"))
     } else {
       api_call_payload <- '{"query": {"match_all": {}}}'
       doc_type_ids <- as.vector(scroll_search(rescource, api_call_payload, extract_id_results))
@@ -201,7 +205,7 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 
       file.remove(deletions_file)
       check_http_code_throw_error(response)
-      print(paste0("... ", rescource$index, "/", rescource$doc_type, " has been deleted"))
+      message(paste0("... ", rescource$index, "/", rescource$doc_type, " has been deleted"))
     }
   } else {
     metadata <- create_metadata("delete", rescource$index, rescource$doc_type, ids)
@@ -212,7 +216,7 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 
     file.remove(deletions_file)
     check_http_code_throw_error(response)
-    print(paste0("... ", paste0(ids, collapse = ", "), " have been deleted"))
+    message(paste0("... ", paste0(ids, collapse = ", "), " have been deleted"))
   }
 }
 
@@ -231,9 +235,28 @@ elastic <- function(cluster_url, index, doc_type = NULL) {
 #' @examples
 #' all_docs <- query('{"match_all": {}}')
 query <- function(json, size = 0) {
-  stopifnot(jsonlite::validate(json))
+  stopifnot(valid_json(json))
   api_call <- paste0('"query":', json)
-  structure(list("api_call" = api_call, "size" = size), class = c("elastic_query", "elastic_api", "elastic"))
+  structure(list("api_call" = api_call, "size" = size),
+            class = c("elastic_query", "elastic_api", "elastic"))
+}
+
+
+#' Define Elasticsearch query sort
+#'
+#' @export
+#'
+#' @param json JSON object describing the sorting required on the query results.
+#' @return An \code{elastic_sort} object.
+#'
+#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/5.0/search-request-sort.html}
+#'
+#' @examples
+#' sort_by_key <- sort('[{"sort_key": {"order": "asc"}}]')
+sort <- function(json) {
+  stopifnot(valid_json(json))
+  api_call <- paste0('"sort":', json)
+  structure(list("api_call" = api_call), class = c("elastic_sort", "elastic_api", "elastic"))
 }
 
 
@@ -252,7 +275,7 @@ query <- function(json, size = 0) {
 #'       "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
 #' }')
 aggs <- function(json) {
-  stopifnot(jsonlite::validate(json))
+  stopifnot(valid_json(json))
   api_call <- paste0('"aggs":', json)
   structure(list("api_call" = api_call), class = c("elastic_aggs", "elastic_api", "elastic"))
 }
@@ -266,8 +289,8 @@ aggs <- function(json) {
 #'
 #' @export
 #'
-#' @param query \code{elastic_query} object.
-#' @param aggs  \code{elastic_aggs} object.
+#' @param x \code{elastic_query} object.
+#' @param y \code{elastic_aggs} or \code{elastic_sort} object.
 #' @return \code{elastic_aggs} object that contains the query information required for the
 #' aggregation.
 #'
@@ -278,11 +301,25 @@ aggs <- function(json) {
 #'       "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
 #' }')
 #' all_docs + avg_sepal_width_per_cat
-`+.elastic_api` <- function(query, aggs) {
-  stopifnot((is_elastic_query(query) & is_elastic_aggs(aggs)) | (is_elastic_aggs(query) & is_elastic_query(aggs)))
+#'
+#' sort_by_sepal_width <- sort('[{"sepal_width": {"order": "asc"}}]')
+#' all_docs + sort_by_sepal_width
+`+.elastic_api` <- function(x, y) {
+  stopifnot(is_elastic_query(x) & is_elastic_aggs(y) |
+              is_elastic_aggs(x) & is_elastic_query(y) |
+              is_elastic_query(x) & is_elastic_sort(y) |
+              is_elastic_sort(x) & is_elastic_query(y))
 
-  combined_call <- paste0('"size": 0,', query$api_call, ',', aggs$api_call)
-  structure(list(api_call = combined_call), class = c("elastic_aggs", "elastic_api", "elastic"))
+  if (is_elastic_query(x) & is_elastic_sort(y) | is_elastic_query(y) & is_elastic_sort(x)) {
+    query_size <- if (is_elastic_query(x)) x$size else y$size
+    api_call <- paste0(x$api_call, ',', y$api_call)
+    structure(list("api_call" = api_call, "size" = query_size),
+              class = c("elastic_query", "elastic_api", "elastic"))
+
+  } else if (is_elastic_query(x) & is_elastic_aggs(y) | is_elastic_query(y) & is_elastic_aggs(x)) {
+    combined_call <- paste0('"size": 0,', x$api_call, ',', y$api_call)
+    structure(list(api_call = combined_call), class = c("elastic_aggs", "elastic_api", "elastic"))
+  }
 }
 
 

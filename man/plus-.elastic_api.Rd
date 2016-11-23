@@ -4,12 +4,12 @@
 \alias{+.elastic_api}
 \title{Define Elasticsearch aggregation on a secific subset of documents.}
 \usage{
-\method{+}{elastic_api}(query, aggs)
+\method{+}{elastic_api}(x, y)
 }
 \arguments{
-\item{query}{\code{elastic_query} object.}
+\item{x}{\code{elastic_query} object.}
 
-\item{aggs}{\code{elastic_aggs} object.}
+\item{y}{\code{elastic_aggs} or \code{elastic_sort} object.}
 }
 \value{
 \code{elastic_aggs} object that contains the query information required for the
@@ -27,5 +27,8 @@ avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {
       "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
 }')
 all_docs + avg_sepal_width_per_cat
+
+sort_by_sepal_width <- sort('[{"sepal_width": {"order": "asc"}}]')
+all_docs + sort_by_sepal_width
 }
 
