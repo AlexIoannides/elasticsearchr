@@ -1,14 +1,13 @@
 [![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr)
 
-- v0.1.0 - a work-in-progress, but definitely useable.
-- Currently being built and tested using Elasticsearch v2.3.5
+- v0.1.0 - built and tested using Elasticsearch v2.3.5
 
 ![Alt][esr_img]
 
 # elasticsearchr: a Lightweight Elasticsearch Client for R
-[Elasticsearch][es] is a distributed [NoSQL][nosql] document store search-engine and column-oriented database, whose **fast** (near real-time) reads and powerful aggregation engine make it an excellent choice as an 'analytics database' for R&D, production-use or both. Installation is simple, it ships with default settings that allow it to work effectively out-of-the-box, and all interaction is made via a set of intuitive and extremely [well documented][es_docs] [RESTful][restful] APIs. I've been using it for two years now and I am evangelical.
+[Elasticsearch][es] is a distributed [NoSQL][nosql] document store search-engine and [column-oriented database][es_column], whose **fast** (near real-time) reads and powerful aggregation engine make it an excellent choice as an 'analytics database' for R&D, production-use or both. Installation is simple, it ships with default settings that allow it to work effectively out-of-the-box, and all interaction is made via a set of intuitive and extremely [well documented][es_docs] [RESTful][restful] APIs. I've been using it for two years now and I am evangelical.
 
-The `elasticsearchr` package implements a simple DSL for indexing, deleting, querying and aggregating data in Elasticsearch, from within R. The main purpose of this package is to remove the labour involved with assembling HTTP requests to Elasticsearch's REST APIs and parsing the responses. Instead, users of this package need only send and receive data frames to Elasticsearch resources. Users needing richer functionality are encouraged to investigate the excellent `elastic` package from the good people at [rOpenSci][ropensci].
+The `elasticsearchr` package implements a simple DSL for indexing, deleting, querying, sorting and aggregating data in Elasticsearch, from within R. The main purpose of this package is to remove the labour involved with assembling HTTP requests to Elasticsearch's REST APIs and parsing the responses. Instead, users of this package need only send and receive data frames to Elasticsearch resources. Users needing richer functionality are encouraged to investigate the excellent `elastic` package from the good people at [rOpenSci][ropensci].
 
 This project is currently in a pre-CRAN development phase and only available from [this GitHub repository][githubrepo]. To install it, make sure that you have the `devtools` package installed (this comes bundled with RStudio), and then execute the following on the R command line:
 
@@ -82,8 +81,8 @@ Refers to documents of types 'data' in the 'iris' index located on an Elasticsea
 - it is possible to leave the document type empty if you need to refer to all documents in an index; and,
 - `elastic` objects can be defined even if the underling resources have yet to be brought into existence.
 
-### Index New Data
-To index (insert) data in a data frame, use the `%index%` operator as follows:
+### Indexing New Data
+To index (insert) data from a data frame, use the `%index%` operator as follows:
 
 ```r
 elastic("http://localhost:9200", "iris", "data") %index% iris
@@ -91,7 +90,7 @@ elastic("http://localhost:9200", "iris", "data") %index% iris
 
 In this example, the `iris` dataset is indexed into the 'iris' index and given a document type called 'data'. Note that I have not provided any document ids here. **To explicitly specify document ids there must be a column in the data frame that is labelled `id`**, from which the document ids will be taken.
 
-### Delete Data
+### Deleting Data
 Documents can be deleted in three different ways using the `%delete%` operator. Firstly, an entire index (including the mapping information) can be erased by referencing just the index in the resource - e.g.,
 
 ```r
@@ -114,7 +113,7 @@ elastic("http://localhost:9200", "iris", "data") %delete% c("1", "2", "3", "4", 
 Any type of query that Elasticsearch makes available can be defined in a `query` object using the native Elasticsearch JSON syntax - e.g. to match every document we could use the `match_all` query,
 
 ```r
-everything <- query('{
+for_everything <- query('{
   "match_all": {}
 }')
 ```
@@ -122,7 +121,7 @@ everything <- query('{
 To execute this query we use the `%search%` operator on the appropriate resource - e.g.,
 
 ```r
-elastic("http://localhost:9200", "iris", "data") %search% everything
+elastic("http://localhost:9200", "iris", "data") %search% for_everything
 
 #     sepal_length sepal_width petal_length petal_width    species
 # 1            4.9         3.0          1.4         0.2     setosa
@@ -131,10 +130,11 @@ elastic("http://localhost:9200", "iris", "data") %search% everything
 # 4            5.4         3.9          1.3         0.4     setosa
 # 5            5.1         3.5          1.4         0.3     setosa
 # 6            5.4         3.4          1.7         0.2     setosa
+# ...
 ```
 
 ### Sorting Query Results
-Query results can be sorted on multiple fields by defining a `sort` object using the native Elasticsearch JSON syntax - e.g. to sort by `sepal_width` in ascending order the required `sort` object would be defined as,
+Query results can be sorted on multiple fields by defining a `sort` object using the same Elasticsearch JSON syntax - e.g. to sort by `sepal_width` in ascending order the required `sort` object would be defined as,
 
 ```r
 by_sepal_width <- sort('{"sepal_width": {"order": "asc"}}')
@@ -143,7 +143,7 @@ by_sepal_width <- sort('{"sepal_width": {"order": "asc"}}')
 This is then added to a `query` object whose results we want sorted and executed using the `%search%` operator as before - e.g.,
 
 ```r
-elastic("http://localhost:9200", "iris", "data") %search% (everything + by_sepal_width)
+elastic("http://localhost:9200", "iris", "data") %search% (for_everything + by_sepal_width)
 
 #   sepal_length sepal_width petal_length petal_width    species
 # 1          5.0         2.0          3.5         1.0 versicolor
@@ -152,6 +152,7 @@ elastic("http://localhost:9200", "iris", "data") %search% (everything + by_sepal
 # 4          6.2         2.2          4.5         1.5 versicolor
 # 5          4.5         2.3          1.3         0.3     setosa
 # 6          6.3         2.3          4.4         1.3 versicolor
+# ...
 ```
 
 ### Aggregations
@@ -189,7 +190,7 @@ elastic("http://localhost:9200", "iris", "data") %search% avg_sepal_width
 Queries and aggregations can be combined such that the aggregations are computed on the results of the query. For example, to execute the combination of the above query and aggregation, we would execute,
 
 ```r
-elastic("http://localhost:9200", "iris", "data") %search% (everything + avg_sepal_width)
+elastic("http://localhost:9200", "iris", "data") %search% (for_everything + avg_sepal_width)
 
 #          key doc_count avg_sepal_width.value
 # 1     setosa        50                 3.428
@@ -200,7 +201,7 @@ elastic("http://localhost:9200", "iris", "data") %search% (everything + avg_sepa
 where the combination yields,
 
 ```r
-print(everything + avg_sepal_width)
+print(for_everything + avg_sepal_width)
 
 # {
 #     "size": 0,
@@ -250,6 +251,8 @@ A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and
 [elastic]: https://www.elastic.co "Elastic corp."
 
 [es]: https://www.elastic.co/products/elasticsearch "Elasticsearch"
+
+[es_column]: https://www.elastic.co/blog/elasticsearch-as-a-column-store "Elasticsearch as a Column Store"
 
 [githubrepo]: https://github.com/AlexIoannides/elasticsearchr "Alex's GitHub repository"
 
