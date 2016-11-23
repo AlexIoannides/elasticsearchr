@@ -133,6 +133,27 @@ elastic("http://localhost:9200", "iris", "data") %search% everything
 # 6            5.4         3.4          1.7         0.2     setosa
 ```
 
+### Sorting Query Results
+Query results can be sorted on multiple fields by defining a `sort` object using the native Elasticsearch JSON syntax - e.g. to sort by `sepal_width` in ascending order the required `sort` object would be defined as,
+
+```r
+by_sepal_width <- sort('{"sepal_width": {"order": "asc"}}')
+```
+
+This is then added to a `query` object whose results we want sorted and executed using the `%search%` operator as before - e.g.,
+
+```r
+elastic("http://localhost:9200", "iris", "data") %search% (everything + by_sepal_width)
+
+#   sepal_length sepal_width petal_length petal_width    species
+# 1          5.0         2.0          3.5         1.0 versicolor
+# 2          6.0         2.2          5.0         1.5  virginica
+# 3          6.0         2.2          4.0         1.0 versicolor
+# 4          6.2         2.2          4.5         1.5 versicolor
+# 5          4.5         2.3          1.3         0.3     setosa
+# 6          6.3         2.3          4.4         1.3 versicolor
+```
+
 ### Aggregations
 Similarly, any type of aggregation that Elasticsearch makes available can be defined in an `aggs` object - e.g. to compute the average `sepal_width` per-species of flower we would specify the following aggregation,
 
