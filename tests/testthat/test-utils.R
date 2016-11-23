@@ -32,7 +32,11 @@ test_that('valid_url identifies invalid URLs to Elasticsearch rescources - missi
 
 
 test_that('elastic_version returns the Elasticsearch version number', {
-  # arrang
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
+  # arrange
   url <- "http://localhost:9200"
 
   # act
