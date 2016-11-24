@@ -1,7 +1,7 @@
 Package: elasticsearchr
 Type: Package
-Title: A lightweight API for interacting with Elasticsearch from R
 Version: 0.1.0
+Title: A Lightweight API for Interacting with Elasticsearch from R
 Date: 2016-11-28
 Author: Alex Ioannides
 Maintainer: Alex Ioannides <alex.ioannides@yahoo.co.uk>
