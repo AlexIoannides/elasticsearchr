@@ -10,7 +10,7 @@
 
 The `elasticsearchr` package implements a simple DSL for indexing, deleting, querying, sorting and aggregating data in Elasticsearch, from within R. The main purpose of this package is to remove the labour involved with assembling HTTP requests to Elasticsearch's REST APIs and parsing the responses. Instead, users of this package need only send and receive data frames to Elasticsearch resources. Users needing richer functionality are encouraged to investigate the excellent `elastic` package from the good people at [rOpenSci][ropensci].
 
-This package is available on CRAN or from [this GitHub repository][githubrepo]. To install the latest version from GitHub, make sure that you have the `devtools` package installed (this comes bundled with RStudio), and then execute the following on the R command line:
+This project is currently in a pre-CRAN development phase and only available from [this GitHub repository][githubrepo]. To install it, make sure that you have the `devtools` package installed (this comes bundled with RStudio), and then execute the following on the R command line:
 
 ```r
 devtools::install_github("alexioannides/elasticsearchr")
