@@ -8,7 +8,7 @@ Maintainer: Alex Ioannides <alex.ioannides@yahoo.co.uk>
 Description: A lightweight R interface to 'Elasticsearch' - a NoSQL search-engine and 
     column store database (see <https://www.elastic.co/products/elasticsearch> for more 
     information). This package implements a simple Domain-Specific Language (DSL) for indexing, 
-    deleting, querying, sorting and aggregating data using Elasticsearch.
+    deleting, querying, sorting and aggregating data using 'Elasticsearch'.
 License: Apache License 2.0
 URL: https://github.com/alexioannides/elasticsearchr
 BugReports: https://github.com/alexioannides/elasticsearchr/issues
