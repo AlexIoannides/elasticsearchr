@@ -1,16 +1,16 @@
-[![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/AlexIoannides/elasticsearchr?branch=master&svg=true)](https://ci.appveyor.com/project/AlexIoannides/elasticsearchr)
+[![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/AlexIoannides/elasticsearchr?branch=master&svg=true)](https://ci.appveyor.com/project/AlexIoannides/elasticsearchr) [![cran version](http://www.r-pkg.org/badges/version/elasticsearchr)](https://cran.r-project.org/package=elasticsearchr) [![rstudio mirror downloads](http://cranlogs.r-pkg.org/badges/elasticsearchr?color=E664A4)](https://github.com/metacran/cranlogs.app)
 
-- v0.1.0 - built and tested using Elasticsearch v2.x and v5.x; and,
+- v0.1.0 - built and tested using Elasticsearch v2.x and v5.x.
 - query and aggregation syntax used in the examples below assume that Elasticsearch v2.x is being used.
 
-![Alt][esr_img]
+![][esr_img]
 
 # elasticsearchr: a Lightweight Elasticsearch Client for R
 [Elasticsearch][es] is a distributed [NoSQL][nosql] document store search-engine and [column-oriented database][es_column], whose **fast** (near real-time) reads and powerful aggregation engine make it an excellent choice as an 'analytics database' for R&D, production-use or both. Installation is simple, it ships with default settings that allow it to work effectively out-of-the-box, and all interaction is made via a set of intuitive and extremely [well documented][es_docs] [RESTful][restful] APIs. I've been using it for two years now and I am evangelical.
 
 The `elasticsearchr` package implements a simple DSL for indexing, deleting, querying, sorting and aggregating data in Elasticsearch, from within R. The main purpose of this package is to remove the labour involved with assembling HTTP requests to Elasticsearch's REST APIs and parsing the responses. Instead, users of this package need only send and receive data frames to Elasticsearch resources. Users needing richer functionality are encouraged to investigate the excellent `elastic` package from the good people at [rOpenSci][ropensci].
 
-This project is currently in a pre-CRAN development phase and only available from [this GitHub repository][githubrepo]. To install it, make sure that you have the `devtools` package installed (this comes bundled with RStudio), and then execute the following on the R command line:
+This package is available on [CRAN][cran] or from [this GitHub repository][githubrepo]. To install the latest (development) version from GitHub, make sure that you have the `devtools` package installed (this comes bundled with RStudio), and then execute the following on the R command line:
 
 ```r
 devtools::install_github("alexioannides/elasticsearchr")
@@ -256,6 +256,8 @@ A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and
 [es]: https://www.elastic.co/products/elasticsearch "Elasticsearch"
 
 [es_column]: https://www.elastic.co/blog/elasticsearch-as-a-column-store "Elasticsearch as a Column Store"
+
+[cran]: https://cran.r-project.org/web/packages/elasticsearchr/ "elasticsearchr on CRAN"
 
 [githubrepo]: https://github.com/AlexIoannides/elasticsearchr "Alex's GitHub repository"
 

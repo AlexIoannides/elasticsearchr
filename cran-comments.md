@@ -1,3 +1,13 @@
+## Resubmission
+This is a resubmission. In this version I have:
+
+* Modified file DESCRIPTION, such that License is now Apache License 2.0
+
+* Modified file DESCRIPTION, such that Description is more coprehensive
+
+* Removed file LICENSE
+
+
 ## Test environments
 * local OS X install, R 3.3.2
 * ubuntu 12.04 (on travis-ci), R 3.3.1
