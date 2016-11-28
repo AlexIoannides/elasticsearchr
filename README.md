@@ -1,14 +1,14 @@
 [![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/AlexIoannides/elasticsearchr?branch=master&svg=true)](https://ci.appveyor.com/project/AlexIoannides/elasticsearchr) [![cran version](http://www.r-pkg.org/badges/version/elasticsearchr)](https://cran.r-project.org/package=elasticsearchr) [![rstudio mirror downloads](http://cranlogs.r-pkg.org/badges/elasticsearchr?color=E664A4)](https://github.com/metacran/cranlogs.app)
 
-- v0.1.0 - built and tested using Elasticsearch v2.x and v5.x.
+- built and tested using Elasticsearch v2.x and v5.x.
 - query and aggregation syntax used in the examples below assume that Elasticsearch v2.x is being used.
 
 ![][esr_img]
 
 # elasticsearchr: a Lightweight Elasticsearch Client for R
-[Elasticsearch][es] is a distributed [NoSQL][nosql] document store search-engine and [column-oriented database][es_column], whose **fast** (near real-time) reads and powerful aggregation engine make it an excellent choice as an 'analytics database' for R&D, production-use or both. Installation is simple, it ships with default settings that allow it to work effectively out-of-the-box, and all interaction is made via a set of intuitive and extremely [well documented][es_docs] [RESTful][restful] APIs. I've been using it for two years now and I am evangelical.
+[Elasticsearch][es] is a distributed [NoSQL][nosql] document store search-engine and [column-oriented database][es_column], whose **fast** (near real-time) reads and powerful aggregation engine make it an excellent choice as an 'analytics database' for R&D, production-use or both. Installation is simple, it ships with sensible default settings that allow it to work effectively out-of-the-box, and all interaction is made via a set of intuitive and extremely [well documented][es_docs] [RESTful][restful] APIs. I've been using it for two years now and I am evangelical.
 
-The `elasticsearchr` package implements a simple Domain-Specific Language (DSL) for indexing, deleting, querying, sorting and aggregating data in Elasticsearch, from within R. The main purpose of this package is to remove the labour involved with assembling HTTP requests to Elasticsearch's REST APIs and parsing the responses. Instead, users of this package need only send and receive data frames to Elasticsearch resources. Users needing richer functionality are encouraged to investigate the excellent `elastic` package from the good people at [rOpenSci][ropensci].
+The `elasticsearchr` package implements a simple Domain-Specific Language (DSL) for indexing, deleting, querying, sorting and aggregating data in Elasticsearch, from within R. The main purpose of this package is to remove the labour involved with assembling HTTP requests to Elasticsearch's REST APIs and processing the responses. Instead, users of this package need only send and receive data frames to Elasticsearch resources. Users needing richer functionality are encouraged to investigate the excellent `elastic` package from the good people at [rOpenSci][ropensci].
 
 This package is available on [CRAN][cran] or from [this GitHub repository][githubrepo]. To install the latest development version from GitHub, make sure that you have the `devtools` package installed (this comes bundled with RStudio), and then execute the following on the R command line:
 
@@ -23,7 +23,7 @@ Elasticsearch can be downloaded [here][es_download], where the instructions for 
 $ brew install elasticsearch
 ```
 
-And then start it by executing `$ elasticsearch` from within any Terminal window. Successful installation can be checked by navigating any web browser to `http://localhost:9200`, where the following message should greet you (give or take the cluster name that changes with every restart),
+And then start it by executing `$ elasticsearch` from within any Terminal window. Successful installation and start-up can be checked by navigating any web browser to `http://localhost:9200`, where the following message should greet you (give or take the cluster name that changes with every restart),
 
 ```js
 {
@@ -41,7 +41,7 @@ And then start it by executing `$ elasticsearch` from within any Terminal window
 ```
 
 ## Elasticsearch 101
-If you followed the installation steps above, you have just installed a single Elasticsearch 'node'. When **not** testing on your laptop, Elasticsearch usually comes in clusters of nodes (usually there are at least 3). The easiest easy way to get access to a managed Elasticsearch cluster is by using the [Elastic Cloud][es_cloud] managed service provided by [Elastic][elastic] (Amazon Web Services offer something similar too). For the rest of this brief tutorial I will assuming you're running a single node on your laptop.
+If you followed the installation steps above, you have just installed a single Elasticsearch 'node'. When **not** testing on your laptop, Elasticsearch usually comes in clusters of nodes (usually there are at least 3). The easiest easy way to get access to a managed Elasticsearch cluster is by using the [Elastic Cloud][es_cloud] managed service provided by [Elastic][elastic] (note that Amazon Web Services offer something similar too). For the rest of this brief tutorial I will assuming you're running a single node on your laptop (a great way of working with data that is too big for memory).
 
 In Elasticsearch a 'row' of data is stored as a 'document'. A document is a [JSON][json] object - for example, the first row of R's `iris` dataset,
 
@@ -62,23 +62,25 @@ would be represented as follows using JSON,
 }
 ```
 
-Documents are classified into 'types' and stored in an 'index'. In a crude analogy with traditional SQL databases that is often used, we would associate an index with a database instance and the document types as tables within that database. In practice this example is not accurate - it is better to think of all documents as residing in a single - possibly sparse - table (defined by the index), where the document types represent sub-sets of columns in the table. This is especially so as fields that occur in multiple document types (within the same index), must have the same data-type - for example, if `"name"` exists in document type `customer` as well as in document type `address`, then `"name"` will need to be a `string` in both.
+Documents are classified into 'types' and stored in an 'index'. In a crude analogy with traditional SQL databases that is often used, we would associate an index with a database instance and the document types as tables within that database. In practice this example is not accurate - it is better to think of all documents as residing in a single - possibly sparse - table (defined by the index), where the document types represent non-unique sub-sets of columns in the table. This is especially so as fields that occur in multiple document types (within the same index), must have the same data-type - for example, if `"name"` exists in document type `customer` as well as in document type `address`, then `"name"` will need to be a `string` in both.
 
-Each document is a 'resource' that has a Uniform Resource Locator (URL) associated with it. Elasticsearch URLs all have the following format: `http://your_cluster:9200/your_index/your_doc_type/your_doc_id`. For example, the above `iris` document could be living at `http://localhost:9200/iris/data/1`.
+Each document is considered a 'resource' that has a Uniform Resource Locator (URL) associated with it. Elasticsearch URLs all have the following format: `http://your_cluster:9200/your_index/your_doc_type/your_doc_id`. For example, the above `iris` document could be living at `http://localhost:9200/iris/data/1` - you could even point a web browser to this location and investigate the document's contents.
 
-Although Elasticsearch - like most NoSQL databases - is often referred to as being 'schema free', as we have already see this is not entirely correct. What is true, however, is that the schema - or 'mapping' as it's called in Elasticsearch - does not _need_ to be declared up-front (although you certainly can do this). Elasticsearch is more than capable of guessing the types of fields based on new data indexed for the first time. For more information on any of these basic concepts take a look [here][basic_concepts]
+Although Elasticsearch - like most NoSQL databases - is often referred to as being 'schema free', as we have already see this is not entirely correct. What is true, however, is that the schema - or 'mapping' as it's called in Elasticsearch - does not _need_ to be declared up-front (although you certainly can do this). Elasticsearch is more than capable of guessing the types of fields based on new data indexed for the first time.
+
+For more information on any of these basic concepts take a look [here][basic_concepts]
 
 ## `elasticsearchr`: a Quick Start
 `elasticsearchr` is a **lightweight** client - by this I mean that it only aims to do 'just enough' work to make using Elasticsearch with R easy and intuitive. You will still need to read the [Elasticsearch documentation][es_docs] to understand how to compose queries and aggregations. What follows is a quick summary of what is possible.
 
-### Resources
+### Elasticsearch Data Resources
 Elasticsearch resources, as defined by the URLs described above, are defined as `elastic` objects in `elasticsearchr`. For example,
 
 ```r
 es <- elastic("http://localhost:9200", "iris", "data")
 ```
 
-Refers to documents of types 'data' in the 'iris' index located on an Elasticsearch node on my laptop. Note that:
+Refers to documents of type 'data' in the 'iris' index located on an Elasticsearch node on my laptop. Note that:
 - it is possible to leave the document type empty if you need to refer to all documents in an index; and,
 - `elastic` objects can be defined even if the underling resources have yet to be brought into existence.
 
@@ -243,7 +245,7 @@ elastic("http://localhost:9200", "iris") %create% mapping_default_simple()
 Where in this instance `mapping_default_simple()` is a default mapping that I have shipped with `elasticsearchr`. It switches-off the text analyser for all fields of type 'string' (i.e. switches off free text search), allows all text search to work with case-insensitive lower-case terms, and maps any field with the name 'timestamp' to type 'date', so long as it has the appropriate string or long format.
 
 ## Forthcoming Attractions
-I do not have a grand vision for `elasticsearchr` - I want to keep it a lightweight client that requires knowledge of Elasticsearch - but I would like to add the ability to compose major query and aggregation types, without having to type-out lots of JSON, and to be able to retrieve simple information like the names of all indices in a cluster, and all the document types within an index, etc. Future development will likely be focused in these areas.
+I do not have a grand vision for `elasticsearchr` - I want to keep it a lightweight client that requires knowledge of Elasticsearch - but I would like to add the ability to compose major query and aggregation types, without having to type-out lots of JSON, and to be able to retrieve simple information like the names of all indices in a cluster, and all the document types within an index, etc. Future development will likely be focused in these areas, but I am open to your suggestions (open an issue [here][githubissues]).
 
 ## Acknowledgements
 A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and `jsonlite` packages that `elasticsearchr` leans upon _heavily_.
@@ -260,6 +262,8 @@ A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and
 [cran]: https://cran.r-project.org/web/packages/elasticsearchr/ "elasticsearchr on CRAN"
 
 [githubrepo]: https://github.com/AlexIoannides/elasticsearchr "Alex's GitHub repository"
+
+[githubissues]: https://github.com/AlexIoannides/elasticsearchr/issues "elasticsearchr issues"
 
 [es_download]: https://www.elastic.co/downloads/elasticsearch "Download"
 
