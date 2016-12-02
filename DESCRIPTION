@@ -1,6 +1,6 @@
 Package: elasticsearchr
 Type: Package
-Version: 0.1.0
+Version: 0.1.0.900
 Title: A Lightweight Interface for Interacting with Elasticsearch from R
 Date: 2016-11-24
 Author: Alex Ioannides
