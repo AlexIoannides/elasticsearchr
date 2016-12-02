@@ -1,4 +1,9 @@
 sudo: required
+
 language: r
+
 r_packages:
   - rmarkdown
+
+after_success:
+  - Rscript -e 'library(covr);codecov()'
