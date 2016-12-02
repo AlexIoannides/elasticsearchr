@@ -4,7 +4,7 @@ language: r
 
 r_packages:
   - rmarkdown
-  - covr
+#  - covr
 
-after_success:
-  - Rscript -e 'library(covr);codecov()'
+#after_success:
+#  - Rscript -e 'library(covr);codecov()'
