@@ -158,6 +158,54 @@ test_that('create_bulk_delete_file produces bulk_delete file', {
 })
 
 
+test_that('index_bulk_dataframe correctly indexes a data frame', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
+  # arrange
+  delete_test_data()
+
+  # act
+  index_bulk_dataframe(elastic("http://localhost:9200", "iris", "data"), iris_data)
+  wait_finish_indexing("http://localhost:9200/iris/data/_search?size=150&q=*", 150)
+  query_response <- httr::POST("http://localhost:9200/iris/data/_search?size=150&q=*")
+  query_results <- jsonlite::fromJSON(httr::content(query_response, as = 'text'))$hits$hits$`_source`
+  query_results <- query_results[order(query_results$sort_key), ]
+  row.names(query_results) <- query_results$sort_key
+
+  # assert
+  expect_equal(iris_data, query_results)
+  delete_test_data()
+})
+
+
+test_that('index_bulk_dataframe correctly detects and assigns document ids', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
+  # arrange
+  delete_test_data()
+  iris_data_ids <- iris_data
+  colnames(iris_data_ids) <- c(colnames(iris_data_ids)[1:5], "id")
+
+  # act
+  index_bulk_dataframe(elastic("http://localhost:9200", "iris", "data"), iris_data_ids)
+  wait_finish_indexing("http://localhost:9200/iris/data/_search?size=150&q=*", 150)
+  query_response <- httr::GET("http://localhost:9200/iris/data/150")
+  query_results <- data.frame(
+    jsonlite::fromJSON(httr::content(query_response, as = 'text'))$`_source`,
+    stringsAsFactors = FALSE
+  )
+  row.names(query_results) <- query_results$id
+
+  # assert
+  expect_equal(iris_data_ids[150,], query_results)
+  delete_test_data()
+})
+
+
 test_that('from_size_search retrieves query results from Elasticsearch', {
   # skip if on CRAN or Travis
   skip_on_travis()

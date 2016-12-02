@@ -216,6 +216,54 @@ create_bulk_delete_file <- function(metadata) {
 }
 
 
+#' Index data frame with Elasticsearch Bulk API
+#'
+#' Helper function to orchestrate the assembly of the Bulk API upload file, http request to
+#' Elasticsearch and handling any subsequent respose errors. It's primary purpose is to be called
+#' repeatedly on 'chunks' of a data frame that is too bid to be indexed with a single call to the
+#' Bulk API (and hence the split into smaller more manageable chunks).
+#'
+#' @param rescource An \code{elastic_rescource} object that contains the information on the
+#' Elasticsearch cluster, index and document type, where the indexed data will reside. If this does
+#' not already exist, it will be created automatically.
+#' @param df data.frame whose rows will be indexed as documents in the Elasticsearch cluster.
+#' @return NULL
+#'
+#' @examples
+#' \dontrun{
+#' rescource <- elastic("http://localhost:9200", "iris", "data")
+#' index_bulk_dataframe(rescource, iris)
+#' }
+index_bulk_dataframe <- function(rescource, df) {
+  has_ids <- "id" %in% colnames(df)
+  num_docs <- nrow(df)
+
+  if (has_ids) {
+    metadata <- create_metadata("index", rescource$index, rescource$doc_type, df$id)
+  } else {
+    metadata <- create_metadata("index", rescource$index, rescource$doc_type, n = num_docs)
+  }
+
+  bulk_data_file <- create_bulk_upload_file(metadata, df)
+  response <- httr::PUT(url = rescource$cluster_url,
+                        path = "/_bulk",
+                        body = httr::upload_file(bulk_data_file))
+
+  file.remove(bulk_data_file)
+
+  if (httr::status_code(response) == 200 & !httr::content(response)$errors) {
+    message("...", appendLF = FALSE)
+  } else if (httr::content(response)$errors) {
+    messages <- httr::content(response)$items
+    warning(jsonlite::prettify(httr::content(response, as = "text")))
+  } else {
+    check_http_code_throw_error(response)
+  }
+
+  NULL
+}
+
+
 #' Execute query with from-size search API.
 #'
 #' The from-size search API allows a maximum of 10,000 search results (the maximum 'size') to be
