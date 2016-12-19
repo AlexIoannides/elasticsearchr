@@ -172,30 +172,16 @@ aggs <- function(json) {
 `%index%.elastic_rescource` <- function(rescource, df) {
   stopifnot(is_elastic_rescource(rescource), is.data.frame(df), !is.null(rescource$doc_type))
   colnames(df) <- cleaned_field_names(colnames(df))
-  has_ids <- "id" %in% colnames(df)
-  num_docs <- nrow(df)
 
-  if (has_ids) {
-    metadata <- create_metadata("index", rescource$index, rescource$doc_type, df$id)
-  } else {
-    metadata <- create_metadata("index", rescource$index, rescource$doc_type, n = num_docs)
-  }
+  df_size_mb <- utils::object.size(df) / (1000 * 1000)
+  chunk_size_mb <- 10
+  num_data_chunks <- ceiling(df_size_mb / chunk_size_mb)
+  num_rows_per_chunk <- ceiling(nrow(df) / num_data_chunks)
+  chunk_indices <- lapply(X = seq(1, nrow(df), num_rows_per_chunk),
+                          FUN = function(x) c(x, min(nrow(df), x + num_rows_per_chunk - 1)))
 
-  bulk_data_file <- create_bulk_upload_file(metadata, df)
-  response <- httr::PUT(url = rescource$cluster_url,
-                       path = "/_bulk",
-                       body = httr::upload_file(bulk_data_file))
-
-  file.remove(bulk_data_file)
-
-  if (httr::status_code(response) == 200 & !httr::content(response)$errors) {
-    message("... data successfully indexed")
-  } else if (httr::content(response)$errors) {
-    messages <- httr::content(response)$items
-    warning(jsonlite::prettify(httr::content(response, as = "text")))
-  } else {
-    check_http_code_throw_error(response)
-  }
+  lapply(X = chunk_indices, FUN = function(x) index_bulk_dataframe(rescource, df[x[1]:x[2], ]))
+  message("... data successfully indexed", appendLF = FALSE)
 }
 
 
