@@ -353,7 +353,7 @@ scroll_search <- function(rescource, api_call_payload, extract_function = extrac
   scroll_search_url <- paste0(rescource$cluster_url, "/_search/scroll")
   scroll_results <- list()
 
-  initial_scroll_search_url <- paste0(rescource$search_url, "?scroll=1m")
+  initial_scroll_search_url <- paste0(rescource$search_url, "?size=10000&scroll=1m")
   initial_response <- httr::POST(initial_scroll_search_url, body = api_call_payload)
   check_http_code_throw_error(initial_response)
 
