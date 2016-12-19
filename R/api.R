@@ -112,8 +112,8 @@ query <- function(json, size = 0) {
 #' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/5.0/search-request-sort.html}
 #'
 #' @examples
-#' sort_by_key <- sort('[{"sort_key": {"order": "asc"}}]')
-sort <- function(json) {
+#' sort_by_key <- sort_on('[{"sort_key": {"order": "asc"}}]')
+sort_on <- function(json) {
   stopifnot(valid_json(json))
   api_call <- paste0('"sort":', json)
   structure(list("api_call" = api_call), class = c("elastic_sort", "elastic_api", "elastic"))
@@ -339,7 +339,7 @@ aggs <- function(json) {
 #' }')
 #' all_docs + avg_sepal_width_per_cat
 #'
-#' sort_by_sepal_width <- sort('[{"sepal_width": {"order": "asc"}}]')
+#' sort_by_sepal_width <- sort_on('[{"sepal_width": {"order": "asc"}}]')
 #' all_docs + sort_by_sepal_width
 `+.elastic_api` <- function(x, y) {
   stopifnot(is_elastic_query(x) & is_elastic_aggs(y) |
