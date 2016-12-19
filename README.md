@@ -141,7 +141,7 @@ elastic("http://localhost:9200", "iris", "data") %search% for_everything
 Query results can be sorted on multiple fields by defining a `sort` object using the same Elasticsearch JSON syntax - e.g. to sort by `sepal_width` in ascending order the required `sort` object would be defined as,
 
 ```r
-by_sepal_width <- sort('{"sepal_width": {"order": "asc"}}')
+by_sepal_width <- sort_on('{"sepal_width": {"order": "asc"}}')
 ```
 
 This is then added to a `query` object whose results we want sorted and executed using the `%search%` operator as before - e.g.,

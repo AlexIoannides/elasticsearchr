@@ -28,7 +28,7 @@ avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {
 }')
 all_docs + avg_sepal_width_per_cat
 
-sort_by_sepal_width <- sort('[{"sepal_width": {"order": "asc"}}]')
+sort_by_sepal_width <- sort_on('[{"sepal_width": {"order": "asc"}}]')
 all_docs + sort_by_sepal_width
 }
 

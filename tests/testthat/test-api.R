@@ -91,7 +91,7 @@ test_that('sort objects have the correct classes assigned to them', {
   by_sepal_width <- '{"sepal_width": {"order": "asc"}}'
 
   # act
-  es_sort <- sort(by_sepal_width)
+  es_sort <- sort_on(by_sepal_width)
 
   # assert
   expect_identical(class(es_sort), c("elastic_sort", "elastic_api", "elastic"))
@@ -103,7 +103,7 @@ test_that('sort objects will not accept invalid JSON', {
   bad_sort_json <- '{"sepal_width": {"order": "asc"}'
 
   # act & assert
-  expect_error(sort(bad_sort_json))
+  expect_error(sort_on(bad_sort_json))
 })
 
 
@@ -112,7 +112,7 @@ test_that('sort objects generate the correct search API call', {
   by_sepal_width <- '{"sepal_width": {"order": "asc"}}'
 
   # act
-  es_sort <- sort(by_sepal_width)
+  es_sort <- sort_on(by_sepal_width)
 
   # assert
   expect_identical(es_sort$api_call, '"sort":{"sepal_width": {"order": "asc"}}')
@@ -308,7 +308,7 @@ test_that('we can query using the %search% operator on a subset of all documents
   load_test_data()
   everything <- '{"match_all": {}}'
   by_key <- '{"sort_key": {"order": "asc"}}'
-  es_query <- query(everything, size = 10) + sort(by_key)
+  es_query <- query(everything, size = 10) + sort_on(by_key)
 
   # act
   query_results <- elastic("http://localhost:9200", "iris", "data") %search% es_query
@@ -356,7 +356,7 @@ test_that('we can query + sort using the %search% operator', {
   by_sepal_width <- '[{"sepal_width": {"order": "asc"}}, {"sort_key": {"order": "asc"}}]'
 
   es_query <- query(everything)
-  es_sort <- sort(by_sepal_width)
+  es_sort <- sort_on(by_sepal_width)
   es_query_sorted <- es_query + es_sort
 
   # act
@@ -406,7 +406,7 @@ test_that('adding a sort object to a query object results in a query object', {
 
   # act
   es_query <- query(everything)
-  es_sort <- sort(by_sepal_width)
+  es_sort <- sort_on(by_sepal_width)
   es_query_sorted <- es_query + es_sort
 
   # assert
@@ -421,7 +421,7 @@ test_that('adding a sort object to a query object generates the correct search A
 
   # act
   es_query <- query(everything)
-  es_sort <- sort(by_sepal_width)
+  es_sort <- sort_on(by_sepal_width)
   es_query_sorted <- es_query + es_sort
 
   # assert
