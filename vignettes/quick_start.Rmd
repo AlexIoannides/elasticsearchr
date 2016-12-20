@@ -143,7 +143,7 @@ elastic("http://localhost:9200", "iris", "data") %search% for_everything
 Query results can be sorted on multiple fields by defining a `sort` object using the same Elasticsearch JSON syntax - e.g. to sort by `sepal_width` in ascending order the required `sort` object would be defined as,
 
 ```r
-by_sepal_width <- sort('{"sepal_width": {"order": "asc"}}')
+by_sepal_width <- sort_on('{"sepal_width": {"order": "asc"}}')
 ```
 
 This is then added to a `query` object whose results we want sorted and executed using the `%search%` operator as before - e.g.,
@@ -254,7 +254,7 @@ I do not have a grand vision for `elasticsearchr` - I want to keep it a lightwei
 A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and `jsonlite` packages that `elasticsearchr` leans upon _heavily_.
 
 
-[esr_img]: http://alexioannides.files.wordpress.com/2016/11/elasticsearchr2.png "Elasticsearchr"
+[esr_img]: https://alexioannides.files.wordpress.com/2016/12/elasticsearchr2.png "Elasticsearchr"
 
 [elastic]: https://www.elastic.co "Elastic corp."
 
@@ -262,7 +262,7 @@ A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and
 
 [es_column]: https://www.elastic.co/blog/elasticsearch-as-a-column-store "Elasticsearch as a Column Store"
 
-[cran]: https://cran.r-project.org/web/packages/elasticsearchr/ "elasticsearchr on CRAN"
+[cran]: https://cran.r-project.org/package=elasticsearchr "elasticsearchr on CRAN"
 
 [githubrepo]: https://github.com/AlexIoannides/elasticsearchr "Alex's GitHub repository"
 

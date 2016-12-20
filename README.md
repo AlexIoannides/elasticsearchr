@@ -260,7 +260,7 @@ A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and
 
 [es_column]: https://www.elastic.co/blog/elasticsearch-as-a-column-store "Elasticsearch as a Column Store"
 
-[cran]: https://cran.r-project.org/web/packages/elasticsearchr/ "elasticsearchr on CRAN"
+[cran]: https://cran.r-project.org/package=elasticsearchr "elasticsearchr on CRAN"
 
 [githubrepo]: https://github.com/AlexIoannides/elasticsearchr "Alex's GitHub repository"
 

@@ -1,4 +1,4 @@
-# elasticsearchr 0.1.0.900
+# elasticsearchr 0.2.0
 
 * BREAKING CHANGE: `sort` has been renamed to `sort_on` to avoid clashing with the sort function in base R;
 * Fixed an issue with `valid_url` that was causing an error on r-oldrel-windows-ix86+x86_64;
