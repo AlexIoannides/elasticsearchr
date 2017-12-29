@@ -1,3 +1,8 @@
+# elasticsearchr 0.2.1
+
+* Fixed an issue where `valid_url` will not return `TRUE` when Elasticsearch port numbers are not 4 digits long;
+
+
 # elasticsearchr 0.2.0
 
 * BREAKING CHANGE: `sort` has been renamed to `sort_on` to avoid clashing with the sort function in base R;
