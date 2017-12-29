@@ -208,7 +208,8 @@ aggs <- function(json) {
 
 #' @export
 `%create%.elastic_rescource` <- function(rescource, mapping) {
-  response <- httr::PUT(paste(rescource$cluster_url, rescource$index, sep = "/"), body = mapping)
+  response <- httr::PUT(paste(rescource$cluster_url, rescource$index, sep = "/"), body = mapping,
+                        httr::add_headers("Content-Type" = "application/json"))
   check_http_code_throw_error(response)
   message(paste("...", rescource$index, "has been created"))
 }
@@ -253,7 +254,8 @@ aggs <- function(json) {
       deletions_file <- create_bulk_delete_file(metadata)
       response <- httr::PUT(url = rescource$cluster_url,
                             path = "/_bulk",
-                            body = httr::upload_file(deletions_file))
+                            body = httr::upload_file(deletions_file),
+                            httr::add_headers("Content-Type" = "application/json"))
 
       file.remove(deletions_file)
       check_http_code_throw_error(response)
@@ -264,7 +266,8 @@ aggs <- function(json) {
     deletions_file <- create_bulk_delete_file(metadata)
     response <- httr::PUT(url = rescource$cluster_url,
                           path = "/_bulk",
-                          body = httr::upload_file(deletions_file))
+                          body = httr::upload_file(deletions_file),
+                          httr::add_headers("Content-Type" = "application/json"))
 
     file.remove(deletions_file)
     check_http_code_throw_error(response)

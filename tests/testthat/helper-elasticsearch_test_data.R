@@ -44,7 +44,9 @@ load_test_data <- function() {
   if (elastic_version("http://localhost:9200")$major >= 5) {
     default_iris_mapping <- '{"mappings":{"_default_":{"dynamic_templates":[{"strings":{
       "match_mapping_type":"string","mapping":{"type":"text","fielddata":true}}}]}}}'
-    response <- httr::PUT("http://localhost:9200/iris", body = default_iris_mapping)
+    response <- httr::PUT("http://localhost:9200/iris", body = default_iris_mapping,
+                          httr::add_headers("Content-Type" = "application/json"))
+
     check_http_code_throw_error(response)
   }
 
@@ -52,7 +54,7 @@ load_test_data <- function() {
   for (i in 1:150) {
     iris_json_data <- gsub("\\[|\\]", "", jsonlite::toJSON((iris_data[i, ])))
     response <- httr::POST(paste0("http://localhost:9200/iris/data/", i), body = iris_json_data,
-                           encode = "json")
+                           encode = "json", httr::add_headers("Content-Type" = "application/json"))
     if (httr::status_code(response) != 201) {
       stop("cannot index data into Elasticsearch for running tests", call. = FALSE)
     }

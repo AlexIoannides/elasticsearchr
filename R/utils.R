@@ -247,10 +247,10 @@ index_bulk_dataframe <- function(rescource, df) {
   bulk_data_file <- create_bulk_upload_file(metadata, df)
   response <- httr::PUT(url = rescource$cluster_url,
                         path = "/_bulk",
-                        body = httr::upload_file(bulk_data_file))
+                        body = httr::upload_file(bulk_data_file),
+                        httr::add_headers("Content-Type" = "application/json"))
 
   file.remove(bulk_data_file)
-
   if (httr::status_code(response) == 200 & !httr::content(response)$errors) {
     message("...", appendLF = FALSE)
   } else if (httr::content(response)$errors) {
