@@ -180,7 +180,7 @@ avg_sepal_width <- aggs('{
 }')
 ```
 
-_(Elasticsearch 5.x users please note that when using the out-of-the-box mappings the above aggregation requires that `"field": "species"` be changed to `"field": "species.keyword"` - see [here][es_five_mappings] for more information as to why)_
+_(Elasticsearch 5.x and 6.x users please note that when using the out-of-the-box mappings the above aggregation requires that `"field": "species"` be changed to `"field": "species.keyword"` - see [here][es_five_mappings] for more information as to why)_
 
 This aggregation is also executed via the `%search%` operator on the appropriate resource - e.g.,
 
