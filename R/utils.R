@@ -404,7 +404,13 @@ extract_query_results <- function(response) {
 
 #' @rdname extract_query_results
 extract_aggs_results <- function(response) {
-  df <- jsonlite::fromJSON(httr::content(response, as = 'text'))$aggregations[[1]]$buckets
+  data <- jsonlite::fromJSON(httr::content(response, as = 'text'))
+  # are results from a bucket aggregation or metric aggregation?
+  if ("buckets" %in% names(data$aggregations[[1]])) {
+    df <- data$aggregations[[1]]$buckets
+  } else {
+    df <- as.data.frame(data$aggregations[[1]])
+  }
   if (length(df) == 0) stop("no aggs results returned")
   jsonlite::flatten(df)
 }
