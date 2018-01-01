@@ -465,7 +465,7 @@ test_that('adding an aggs object to a query object generates the correct search 
   es_agg_on_query <- es_query + es_agg
 
   # assert
-  expected_api_call <- '"size": 0,"query":{"match_all": {}},"aggs":{"avg_sepal_width_per_cat": {
+  expected_api_call <- '"query":{"match_all": {}},"aggs":{"avg_sepal_width_per_cat": {
     "terms": {"field": "species"},
     "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
   }'

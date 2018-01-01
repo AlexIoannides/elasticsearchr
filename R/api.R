@@ -137,7 +137,8 @@ sort_on <- function(json) {
 aggs <- function(json) {
   stopifnot(valid_json(json))
   api_call <- paste0('"aggs":', json)
-  structure(list("api_call" = api_call), class = c("elastic_aggs", "elastic_api", "elastic"))
+  structure(list("api_call" = api_call, "size" = 0),
+            class = c("elastic_aggs", "elastic_api", "elastic"))
 }
 
 
@@ -314,8 +315,8 @@ aggs <- function(json) {
       return(scroll_search(rescource, api_call_payload))
 
     }
-  } else {
-    api_call_payload <- paste0('{', search$api_call, '}')
+  } else if (is_elastic_aggs(search)) {
+    api_call_payload <- paste0('{"size":', search$size, ', ', search$api_call, '}')
     return(from_size_search(rescource, api_call_payload))
   }
 }
@@ -357,8 +358,9 @@ aggs <- function(json) {
               class = c("elastic_query", "elastic_api", "elastic"))
 
   } else if (is_elastic_query(x) & is_elastic_aggs(y) | is_elastic_query(y) & is_elastic_aggs(x)) {
-    combined_call <- paste0('"size": 0,', x$api_call, ',', y$api_call)
-    structure(list(api_call = combined_call), class = c("elastic_aggs", "elastic_api", "elastic"))
+    combined_call <- paste0(x$api_call, ',', y$api_call)
+    structure(list("api_call" = combined_call, "size" = 0),
+              class = c("elastic_aggs", "elastic_api", "elastic"))
   }
 }
 
@@ -375,6 +377,6 @@ aggs <- function(json) {
 #' all_docs <- query('{"match_all": {}}')
 #' print(all_docs)
 print.elastic_api <- function(x, ...) {
-  complete_json <- paste0('{', x$api_call, '}')
+  complete_json <- paste0('{', '"size": ', x$size, ', ',x$api_call, '}')
   jsonlite::prettify(complete_json)
 }
