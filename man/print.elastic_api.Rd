@@ -21,4 +21,3 @@ Pretty-print aggs and query JSON objects.
 all_docs <- query('{"match_all": {}}')
 print(all_docs)
 }
-

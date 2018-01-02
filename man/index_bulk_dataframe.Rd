@@ -25,4 +25,3 @@ rescource <- elastic("http://localhost:9200", "iris", "data")
 index_bulk_dataframe(rescource, iris)
 }
 }
-

@@ -24,4 +24,3 @@ avg_sepal_width_per_cat <- aggs('{"avg_sepal_width_per_cat": {
 \seealso{
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations.html}
 }
-

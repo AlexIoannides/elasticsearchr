@@ -24,4 +24,3 @@ all_docs <- query('{"match_all": {}}')
 \seealso{
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html}
 }
-

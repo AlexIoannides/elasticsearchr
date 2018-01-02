@@ -9,4 +9,3 @@ mapping_fielddata_true()
 \description{
 A default mapping that enables fielddata for all string/text fields in Elasticsearch 5.x.
 }
-

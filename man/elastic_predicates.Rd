@@ -3,10 +3,10 @@
 \name{elastic_predicates}
 \alias{elastic_predicates}
 \alias{is_elastic}
-\alias{is_elastic_aggs}
+\alias{is_elastic_rescource}
 \alias{is_elastic_api}
 \alias{is_elastic_query}
-\alias{is_elastic_rescource}
+\alias{is_elastic_aggs}
 \alias{is_elastic_sort}
 \title{elasticsearchr predicate functions.}
 \usage{
@@ -31,4 +31,3 @@ Boolean.
 \description{
 Predicate functions for identifying different elasticsearchr object types.
 }
-

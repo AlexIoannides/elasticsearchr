@@ -8,4 +8,3 @@
 \description{
 Allows you to index, update and delete documents as well as run queries and aggregations.
 }
-

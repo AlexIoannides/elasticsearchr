@@ -1,7 +1,8 @@
 # elasticsearchr 0.2.1
 
-* Fixed an issue where `valid_url` will not return `TRUE` when Elasticsearch port numbers are not 4 digits long;
 * Modified all HTTP requests to have `Content-Type` headers for Elasticsearch 6.x compatibility;
+* Fixed an issue where `extract_aggs_results` could not handle results from base metric aggregations;
+* Fixed an issue where `valid_url` will not return `TRUE` when Elasticsearch port numbers are not 4 digits long;
 
 
 # elasticsearchr 0.2.0

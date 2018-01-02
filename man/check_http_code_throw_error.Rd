@@ -16,4 +16,3 @@ Exception with prettified JSON response printed to stderr.
 If an HTTP request returns a status code that is not 200, then this functions throws an
 exception and prints the prettified response contents to stderr.
 }
-
