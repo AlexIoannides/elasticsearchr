@@ -409,7 +409,7 @@ extract_aggs_results <- function(response) {
   if ("buckets" %in% names(data$aggregations[[1]])) {
     df <- data$aggregations[[1]]$buckets
   } else {
-    df <- as.data.frame(data$aggregations[[1]])
+    df <- as.data.frame(data$aggregations)
   }
   if (length(df) == 0) stop("no aggs results returned")
   jsonlite::flatten(df)

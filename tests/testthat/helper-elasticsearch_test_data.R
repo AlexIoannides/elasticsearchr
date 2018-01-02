@@ -21,12 +21,18 @@ iris_data["sort_key"] <- 1:150
 
 
 # ---- compute expected aggretaion results ----
-iris_test_aggs <- data.frame(
+iris_test_aggs_bucket <- data.frame(
   "key" = c("setosa", "versicolor", "virginica"),
   "doc_count" = c(50, 50, 50),
   "avg_sepal_width.value" = c(3.428, 2.770, 2.974),
   stringsAsFactors = FALSE
   )
+
+
+iris_test_aggs_metric <- data.frame(
+  "value" = 3.0573333358764647,
+  stringsAsFactors = FALSE
+)
 
 
 # ---- functions for loading and deleting test data from Elasticsearch on http://localhost:9200 ----
