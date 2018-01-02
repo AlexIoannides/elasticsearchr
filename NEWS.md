@@ -1,3 +1,10 @@
+# elasticsearchr 0.2.1
+
+* Modified all HTTP requests to have `Content-Type` headers for Elasticsearch 6.x compatibility;
+* Fixed an issue where `extract_aggs_results` could not handle results from base metric aggregations;
+* Fixed an issue where `valid_url` will not return `TRUE` when Elasticsearch port numbers are not 4 digits long;
+
+
 # elasticsearchr 0.2.0
 
 * BREAKING CHANGE: `sort` has been renamed to `sort_on` to avoid clashing with the sort function in base R;
@@ -10,6 +17,3 @@
 # elasticsearchr 0.1.0
 
 * Initial release.
-
-
-

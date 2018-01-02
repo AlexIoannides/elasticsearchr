@@ -38,4 +38,3 @@ create_metadata("index", "iris", "data", n = 2)
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html}
 for more information on the information required by the Elasticsearch Bulk API.
 }
-

@@ -30,4 +30,3 @@ elastic("http://localhost:9200", "iris", "data") \%index\% iris
 \seealso{
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html}
 }
-

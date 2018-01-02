@@ -243,7 +243,7 @@ test_that('from_size_search retrieves aggregation results from Elasticsearch', {
                                     aggs)
 
   # assert
-  expect_equal(aggs_results, iris_test_aggs)
+  expect_equal(aggs_results, iris_test_aggs_bucket)
   delete_test_data()
 })
 

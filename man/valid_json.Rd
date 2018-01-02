@@ -26,4 +26,3 @@ valid_json(bad_json)
 # FALSE
 }
 }
-

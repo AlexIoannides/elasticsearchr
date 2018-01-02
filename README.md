@@ -1,7 +1,7 @@
 <!-- [![codecov](https://codecov.io/github/alexioannides/elasticsearchr/branch/master/graphs/badge.svg)](https://codecov.io/github/alexioannides/elasticsearchr) -->
 [![Build Status](https://travis-ci.org/AlexIoannides/elasticsearchr.svg?branch=master)](https://travis-ci.org/AlexIoannides/elasticsearchr) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/AlexIoannides/elasticsearchr?branch=master&svg=true)](https://ci.appveyor.com/project/AlexIoannides/elasticsearchr) [![cran version](http://www.r-pkg.org/badges/version/elasticsearchr)](https://cran.r-project.org/package=elasticsearchr) [![rstudio mirror downloads](http://cranlogs.r-pkg.org/badges/grand-total/elasticsearchr)](https://github.com/metacran/cranlogs.app)
 
-- built and tested using Elasticsearch v2.x and v5.x.
+- built and tested using Elasticsearch v2.x, v5.x, v6.x.
 - query and aggregation syntax used in the examples below assume that Elasticsearch v2.x is being used.
 
 ![][esr_img]
@@ -180,7 +180,7 @@ avg_sepal_width <- aggs('{
 }')
 ```
 
-_(Elasticsearch 5.x users please note that when using the out-of-the-box mappings the above aggregation requires that `"field": "species"` be changed to `"field": "species.keyword"` - see [here][es_five_mappings] for more information as to why)_
+_(Elasticsearch 5.x and 6.x users please note that when using the out-of-the-box mappings the above aggregation requires that `"field": "species"` be changed to `"field": "species.keyword"` - see [here][es_five_mappings] for more information as to why)_
 
 This aggregation is also executed via the `%search%` operator on the appropriate resource - e.g.,
 

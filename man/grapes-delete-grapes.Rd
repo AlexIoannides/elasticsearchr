@@ -23,4 +23,3 @@ entire index (if the document type is unspecified.)
 elastic("http://localhost:9200", "iris", "data") \%delete\% TRUE
 }
 }
-

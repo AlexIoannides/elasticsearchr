@@ -25,4 +25,3 @@ Elasticsearch cluster.
 my_data <- elastic("http://localhost:9200", "iris", "data")
 }
 }
-

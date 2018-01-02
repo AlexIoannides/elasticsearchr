@@ -159,7 +159,7 @@ test_that('aggs objects generate the correct search API call', {
   "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
   }'
   expect_identical(es_agg$api_call, expected_api_call)
-  })
+})
 
 
 # ---- operators ----------------------------------------------------------------------------------
@@ -322,7 +322,7 @@ test_that('we can query using the %search% operator on a subset of all documents
 })
 
 
-test_that('we can aggregate using the %search% operator', {
+test_that('we can use bucket aggregations using the %search% operator', {
   # skip if on CRAN or Travis
   skip_on_travis()
   skip_on_cran()
@@ -339,11 +339,30 @@ test_that('we can aggregate using the %search% operator', {
   aggs_results <- elastic("http://localhost:9200", "iris", "data") %search% es_aggs
 
   # assert
-  expect_equal(aggs_results, iris_test_aggs)
+  expect_equal(aggs_results, iris_test_aggs_bucket)
   delete_test_data()
-  })
+})
 
-#
+
+test_that('we can use base-metric aggregations using the %search% operator', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
+  # arrange
+  load_test_data()
+  avg_sepal_width_per_cat <- '{"avg_sepal_width": {"avg": {"field": "sepal_width"}}}'
+  es_aggs <- aggs(avg_sepal_width_per_cat)
+
+  # act
+  aggs_results <- elastic("http://localhost:9200", "iris", "data") %search% es_aggs
+
+  # assert
+  expect_equal(aggs_results, iris_test_aggs_metric)
+  delete_test_data()
+})
+
+
 test_that('we can query + sort using the %search% operator', {
   # skip if on CRAN or Travis
   skip_on_travis()
@@ -394,7 +413,7 @@ test_that('we can query + aggregate using the %search% operator', {
   aggs_results <- elastic("http://localhost:9200", "iris", "data") %search% es_agg_on_query
 
   # assert
-  expect_equal(aggs_results, iris_test_aggs)
+  expect_equal(aggs_results, iris_test_aggs_bucket)
   delete_test_data()
   })
 
@@ -465,7 +484,7 @@ test_that('adding an aggs object to a query object generates the correct search 
   es_agg_on_query <- es_query + es_agg
 
   # assert
-  expected_api_call <- '"size": 0,"query":{"match_all": {}},"aggs":{"avg_sepal_width_per_cat": {
+  expected_api_call <- '"query":{"match_all": {}},"aggs":{"avg_sepal_width_per_cat": {
     "terms": {"field": "species"},
     "aggs": {"avg_sepal_width": {"avg": {"field": "sepal_width"}}}}
   }'

@@ -247,10 +247,10 @@ index_bulk_dataframe <- function(rescource, df) {
   bulk_data_file <- create_bulk_upload_file(metadata, df)
   response <- httr::PUT(url = rescource$cluster_url,
                         path = "/_bulk",
-                        body = httr::upload_file(bulk_data_file))
+                        body = httr::upload_file(bulk_data_file),
+                        httr::add_headers("Content-Type" = "application/json"))
 
   file.remove(bulk_data_file)
-
   if (httr::status_code(response) == 200 & !httr::content(response)$errors) {
     message("...", appendLF = FALSE)
   } else if (httr::content(response)$errors) {
@@ -298,7 +298,9 @@ index_bulk_dataframe <- function(rescource, df) {
 #' }
 from_size_search <- function(rescource, api_call_payload) {
 
-  response <- httr::POST(rescource$search_url, body = api_call_payload)
+  response <- httr::POST(rescource$search_url, body = api_call_payload,
+                         httr::add_headers("Content-Type" = "application/json"))
+
   check_http_code_throw_error(response)
 
   parsed_response <- jsonlite::fromJSON(httr::content(response, as = 'text'))
@@ -354,7 +356,9 @@ scroll_search <- function(rescource, api_call_payload, extract_function = extrac
   scroll_results <- list()
 
   initial_scroll_search_url <- paste0(rescource$search_url, "?size=10000&scroll=1m")
-  initial_response <- httr::POST(initial_scroll_search_url, body = api_call_payload)
+  initial_response <- httr::POST(initial_scroll_search_url, body = api_call_payload,
+                                 httr::add_headers("Content-Type" = "application/json"))
+
   check_http_code_throw_error(initial_response)
 
   scroll_results[[1]] <- extract_function(initial_response)
@@ -364,7 +368,9 @@ scroll_search <- function(rescource, api_call_payload, extract_function = extrac
   while (has_next) {
     message("...", appendLF = FALSE)
     next_api_payload <- paste0('{"scroll": "1m", "scroll_id": "', next_scroll_id, '"}')
-    next_response <- httr::POST(scroll_search_url, body = next_api_payload)
+    next_response <- httr::POST(scroll_search_url, body = next_api_payload,
+                                httr::add_headers("Content-Type" = "application/json"))
+
     check_http_code_throw_error(next_response)
     if(length(httr::content(next_response)$hits$hits) > 0) {
       scroll_results[[n]] <- extract_function(next_response)
@@ -398,7 +404,13 @@ extract_query_results <- function(response) {
 
 #' @rdname extract_query_results
 extract_aggs_results <- function(response) {
-  df <- jsonlite::fromJSON(httr::content(response, as = 'text'))$aggregations[[1]]$buckets
+  data <- jsonlite::fromJSON(httr::content(response, as = 'text'))
+  # are results from a bucket aggregation or metric aggregation?
+  if ("buckets" %in% names(data$aggregations[[1]])) {
+    df <- data$aggregations[[1]]$buckets
+  } else {
+    df <- as.data.frame(data$aggregations)
+  }
   if (length(df) == 0) stop("no aggs results returned")
   jsonlite::flatten(df)
 }

@@ -28,4 +28,3 @@ valid_url(url)
 # Error in valid_url(url) : invalid URL to Elasticsearch cluster
 }
 }
-

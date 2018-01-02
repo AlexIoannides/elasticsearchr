@@ -12,4 +12,3 @@ free text search), allows all text search to work with case-insensitive lowercas
 maps any field with the name 'timestamp' to type 'date', so long as it has the appropriate
 string or long format.
 }
-

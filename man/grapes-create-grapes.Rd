@@ -26,4 +26,3 @@ elastic("http://localhost:9200", "iris", "data") \%create\% mapping_default_simp
 \seealso{
 \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html}
 }
-
