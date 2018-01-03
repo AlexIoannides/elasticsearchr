@@ -54,7 +54,7 @@ is_elastic_sort <- function(x) inherits(x, "elastic_sort")
 is_elastic_source_filter <- function(x) inherits(x, "elastic_source_filter")
 
 
-#' elastic_rescource class constructor.
+#' elastic_resource class constructor.
 #'
 #' Objects of this class contain all of the information required to locate documents in an
 #' Elasticsearch cluster.
