@@ -119,6 +119,40 @@ test_that('sort objects generate the correct search API call', {
 })
 
 
+test_that('select_fields objects have the correct classes assigned to them', {
+  # arrange
+  select <- '{"includes": ["field1", "obj1.*"], "excludes": ["field2", "obj2.*"]}'
+
+  # act
+  es_source_filter <- select_fields(select)
+
+  # assert
+  expect_identical(class(es_source_filter), c("elastic_source_filter", "elastic_api", "elastic"))
+})
+
+
+test_that('select_fields objects will not accept invalid JSON', {
+  # arrange
+  bad_source_filter_json <- '{"includes": ["field1", "obj1.*"], "excludes": ["field2", "obj2.*"}'
+
+  # act & assert
+  expect_error(select_fields(bad_source_filter_json))
+})
+
+
+test_that('select_fields objects generate the correct search API call', {
+  # arrange
+  select <- '{"includes": ["field1", "obj1.*"], "excludes": ["field2"]}'
+
+  # act
+  es_source_filter <- select_fields(select)
+
+  # assert
+  expected_call <- '"_source": {"includes": ["field1", "obj1.*"], "excludes": ["field2"]}'
+  expect_identical(es_source_filter$api_call, expected_call)
+})
+
+
 test_that('aggs objects have the correct classes assigned to them', {
   # arrange
   avg_sepal_width_per_cat <- '{"avg_sepal_width_per_cat": {
@@ -318,6 +352,32 @@ test_that('we can query using the %search% operator on a subset of all documents
 
   # assert
   expect_equal(query_results_sorted, iris_data[1:10, ])
+  delete_test_data()
+})
+
+
+test_that('we can query using the %search% operator and return a subset of fields', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
+  # arrange
+  load_test_data()
+  fields <- c("sort_key", "sepal_length", "species")
+  everything <- '{"match_all": {}}'
+  source_filter_JSON <- '{"includes": ["sepal_length", "species", "sort_key"]}'
+  es_query <- query(everything)
+  es_source_filter <- select_fields(source_filter_JSON)
+
+  # act
+  query_results <-
+    elastic("http://localhost:9200", "iris", "data") %search% (es_query + es_source_filter)
+
+  query_results_sorted <- query_results[order(query_results["sort_key"]), fields]
+  rownames(query_results_sorted) <- query_results_sorted$sort_key
+
+  # assert
+  expect_equal(query_results_sorted, iris_data[, fields])
   delete_test_data()
 })
 
