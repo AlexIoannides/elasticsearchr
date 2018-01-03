@@ -369,28 +369,57 @@ aggs <- function(json) {
 #' all_docs + sort_by_sepal_width
 `+.elastic_api` <- function(x, y) {
   stopifnot(is_elastic_query(x) & is_elastic_aggs(y) |
-              is_elastic_aggs(x) & is_elastic_query(y) |
-              is_elastic_query(x) & is_elastic_sort(y) |
-              is_elastic_sort(x) & is_elastic_query(y) |
-              is_elastic_source_filter(x) & is_elastic_query(y) |
-              is_elastic_query(x) & is_elastic_source_filter(y))
+            is_elastic_aggs(x) & is_elastic_query(y) |
+            is_elastic_query(x) & is_elastic_sort(y) |
+            is_elastic_sort(x) & is_elastic_query(y) |
+            is_elastic_source_filter(x) & is_elastic_query(y) |
+            is_elastic_query(x) & is_elastic_source_filter(y) |
+            is_elastic_source_filter(x) & is_elastic_sort(y) |
+            is_elastic_sort(x) & is_elastic_source_filter(y) |
+            is_elastic_query(x) & is_elastic_query(y))
 
   if (is_elastic_query(x) & is_elastic_sort(y) | is_elastic_query(y) & is_elastic_sort(x)) {
-    query_size <- if (is_elastic_query(x)) x$size else y$size
-    api_call <- paste0(x$api_call, ',', y$api_call)
-    structure(list("api_call" = api_call, "size" = query_size),
+    query <- if (is_elastic_query(x)) x else y
+    sort <- if (is_elastic_sort(x)) x else y
+    combined_api_call <- paste0(query$api_call, ',', sort$api_call)
+    structure(list("api_call" = combined_api_call, "size" = query$size),
               class = c("elastic_query", "elastic_api", "elastic"))
 
   } else if (is_elastic_source_filter(x) & is_elastic_query(y) |
              is_elastic_query(x) & is_elastic_source_filter(y)) {
-    query_size <- if (is_elastic_query(x)) x$size else y$size
-    api_call <- paste0(x$api_call, ',', y$api_call)
-    structure(list("api_call" = api_call, "size" = query_size),
+    query <- if (is_elastic_query(x)) x else y
+    source_filter <- if (is_elastic_source_filter(x)) x else y
+    combined_api_call <- paste0(source_filter$api_call, ',', query$api_call)
+    structure(list("api_call" = combined_api_call, "size" = query$size),
               class = c("elastic_query", "elastic_api", "elastic"))
 
-  }else if (is_elastic_query(x) & is_elastic_aggs(y) | is_elastic_query(y) & is_elastic_aggs(x)) {
-    combined_call <- paste0(x$api_call, ',', y$api_call)
-    structure(list("api_call" = combined_call, "size" = 0),
+  } else if (is_elastic_source_filter(x) & is_elastic_sort(y) |
+             is_elastic_sort(x) & is_elastic_source_filter(y)) {
+    sort <- if (is_elastic_sort(x)) x else y
+    source_filter <- if (is_elastic_source_filter(x)) x else y
+    combined_api_call <- paste0(source_filter$api_call, ',', sort$api_call)
+    structure(list("api_call" = combined_api_call),
+              class = c("elastic_query", "elastic_api", "elastic"))
+
+  } else if (is_elastic_query(x) & is_elastic_query(y)) {
+    if (!is.null(x$size)) {
+      query_body <- x
+    } else if (!is.null(y$size)) {
+      query_body <- y
+    } else {
+      stop("no main query body in left or right operands", call. = FALSE)
+    }
+
+    query_src_filter_sort <- if (is.null(x$size)) x else y
+    combined_api_call <- paste0(query_body$api_call, ',', query_src_filter_sort$api_call)
+    structure(list("api_call" = combined_api_call, "size" = query_body$size),
+              class = c("elastic_query", "elastic_api", "elastic"))
+
+  } else if (is_elastic_query(x) & is_elastic_aggs(y) | is_elastic_query(y) & is_elastic_aggs(x)) {
+    query <- if (is_elastic_query(x)) x else y
+    aggs <- if (is_elastic_aggs(x)) x else y
+    combined_api_call <- paste0(query$api_call, ',', aggs$api_call)
+    structure(list("api_call" = combined_api_call, "size" = 0),
               class = c("elastic_aggs", "elastic_api", "elastic"))
   }
 }

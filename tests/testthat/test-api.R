@@ -382,6 +382,38 @@ test_that('we can query using the %search% operator and return a subset of field
 })
 
 
+### WIP
+test_that('we can query using the %search% operator and return a sorted subset of fields', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
+  # arrange
+  load_test_data()
+  everything <- '{"match_all": {}}'
+  by_sepal_length <- '[{"sepal_length": {"order": "asc"}}, {"sort_key": {"order": "asc"}}]'
+  source_filter_JSON <- '{"includes": ["sepal_length", "species", "sort_key"]}'
+
+  es_query <- query(everything)
+  es_sort <- sort_on(by_sepal_length)
+  es_source_filter <- select_fields(source_filter_JSON)
+  es_filter_and_sort <- es_source_filter + es_sort
+
+  # act
+  query_results <-
+    elastic("http://localhost:9200", "iris", "data") %search% (es_query + es_filter_and_sort)
+
+  rownames(query_results) <- 1:150
+
+  # assert
+  iris_data_sorted <- iris_data[order(iris_data$sepal_length), colnames(query_results)]
+  rownames(iris_data_sorted) <- 1:150
+  expect_equal(query_results, iris_data_sorted)
+  delete_test_data()
+})
+### WIP
+
+
 test_that('we can use bucket aggregations using the %search% operator', {
   # skip if on CRAN or Travis
   skip_on_travis()
