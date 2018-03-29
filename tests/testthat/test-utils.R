@@ -45,6 +45,17 @@ test_that('valid_url identifies invalid URLs to Elasticsearch rescources - missi
   expect_error(valid_url(url))
 })
 
+test_that('valid_url identifies valid ssl URLs to Elasticsearch resources', {
+  #arrange
+  url <- "https://localhost:9200"
+  
+  #act
+  is_valid_url <- valid_url(url)
+  
+  #assert
+  expect_true(is_valid_url)
+})
+
 
 test_that('elastic_version returns the Elasticsearch version number', {
   # skip if on CRAN or Travis
