@@ -1,3 +1,8 @@
+# elasticsearchr 0.2.2
+
+* Added support for HTTPS endpoints.
+
+
 # elasticsearchr 0.2.1
 
 * Modified all HTTP requests to have `Content-Type` headers for Elasticsearch 6.x compatibility;
