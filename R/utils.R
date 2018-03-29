@@ -33,7 +33,7 @@
 #' # Error in valid_url(url) : invalid URL to Elasticsearch cluster
 #' }
 valid_url <- function(url) {
-  if (grepl("http://", url) & grepl(":[0-9][0-9]+", url) & !(substr(url, nchar(url), nchar(url)) == "/")) {
+  if (grepl("https?://", url) & grepl(":[0-9][0-9]+", url) & !(substr(url, nchar(url), nchar(url)) == "/")) {
     return(TRUE)
   } else {
     stop("invalid URL to Elasticsearch cluster")
