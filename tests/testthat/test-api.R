@@ -18,6 +18,10 @@ context('api')
 
 # ---- classes, methods and predicates ------------------------------------------------------------
 test_that('elastic objects have the correct classes assigned to them', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
   # arrange
   es_rescource <- elastic("http://localhost:9200", "iris", "data")
 
@@ -30,6 +34,10 @@ test_that('elastic objects have the correct classes assigned to them', {
 
 
 test_that('elastic objects correctly assemble search URLs when doc_types are specified', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
   # arrange
   es_rescource <- elastic("http://localhost:9200", "iris", "data")
 
@@ -42,6 +50,10 @@ test_that('elastic objects correctly assemble search URLs when doc_types are spe
 
 
 test_that('elastic objects correctly assemble search URLs when doc_types are not specified', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
   # arrange
   es_rescource <- elastic("http://localhost:9200", "iris")
 
