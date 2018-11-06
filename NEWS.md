@@ -1,3 +1,8 @@
+# elasticsearchr 0.2.3
+
+* Enhanced `valid_url` function to be more robust, by basing it on actual HTTP requests to the cluster.
+
+
 # elasticsearchr 0.2.2
 
 * Added support for HTTPS endpoints.

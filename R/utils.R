@@ -15,9 +15,9 @@
 
 #' Validate Elasticsearch URL.
 #'
-#' Tries to defend against incorrect URLs to Elasticsearch rescources. Requires that URLs must
-#' contain the protocol (e.g. 'http') as well an Elasticsearch port number (e.g. ':9200'), and must
-#' not end in '/'.
+#' Tries to defend against incorrect URLs to Elasticsearch rescources. Requires URLs that point to
+#' master nodes directly - i.e. which return the default Elasticsearch message, "You Know, for
+#' Search".
 #'
 #' @param url The URL to validate.
 #' @return Boolean
@@ -28,16 +28,24 @@
 #' valid_url(url)
 #' # TRUE
 #'
-#' url <- "localhost:9200"
+#' url <- "http://localhost:9201"
 #' valid_url(url)
-#' # Error in valid_url(url) : invalid URL to Elasticsearch cluster
+#' # Error: Elasticsearch cluster not accessible at: http://localhost:9201
 #' }
 valid_url <- function(url) {
-  if (grepl("https?://", url) & grepl(":[0-9][0-9]+", url) & !(substr(url, nchar(url), nchar(url)) == "/")) {
-    return(TRUE)
-  } else {
-    stop("invalid URL to Elasticsearch cluster")
-  }
+  tryCatch(
+    {
+      response <- httr::GET(url)
+      if (response$status_code != 200) stop()
+      response_parsed <- httr::content(response, as = "parsed")
+      if (response_parsed$tagline == "You Know, for Search") {
+        return(TRUE)
+      } else {
+        stop()
+      }
+    },
+    error = function(e) stop(paste("Elasticsearch cluster not accessible at:", url), call. = FALSE)
+  )
 }
 
 
