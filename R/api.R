@@ -68,15 +68,21 @@ is_elastic_sort <- function(x) inherits(x, "elastic_sort")
 #' }
 elastic <- function(cluster_url, index, doc_type = NULL) {
   stopifnot(is.character(cluster_url), is.character(index), is.character(doc_type) | is.null(doc_type),
-            valid_url(cluster_url))
+            valid_connection(cluster_url))
 
-  if (is.null(doc_type)) {
-    valid_cluster_url <- paste(cluster_url, index, "_search", sep = "/")
+  if (substr(cluster_url, nchar(cluster_url), nchar(cluster_url)) == "/") {
+    valid_index_url <- paste0(cluster_url, index)
   } else {
-    valid_cluster_url <- paste(cluster_url, index, doc_type, "_search", sep = "/")
+    valid_index_url <- paste0(cluster_url, "/", index)
   }
 
-  structure(list("search_url" = valid_cluster_url, "cluster_url" = cluster_url,
+  if (is.null(doc_type)) {
+    valid_search_endpoint <- paste0(valid_index_url, "/_search")
+  } else {
+    valid_search_endpoint <- paste0(valid_index_url, "/", doc_type, "/_search")
+  }
+
+  structure(list("search_url" = valid_search_endpoint, "cluster_url" = cluster_url,
                  "index" = index, "doc_type" = doc_type), class = c("elastic_rescource", "elastic"))
 }
 

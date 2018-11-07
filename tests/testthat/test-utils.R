@@ -16,44 +16,32 @@
 context('elasticsearchr utils')
 
 
-test_that('valid_url identifies valid URLs to Elasticsearch rescources', {
+test_that('valid_connection identifies valid URLs to Elasticsearch rescources', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
   # arrange
   url <- "http://localhost:9200"
 
   # act
-  is_valid_url <- valid_url(url)
+  is_valid_connection <- valid_connection(url)
 
   # assert
-  expect_true(is_valid_url)
+  expect_true(is_valid_connection)
 })
 
 
-test_that('valid_url identifies invalid URLs to Elasticsearch rescources - missing protocol', {
+test_that('valid_connection identifies invalid URLs to Elasticsearch rescources', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
   # arrange
-  url <- "localhost:9200"
+  url <- "localhost:9201"
 
   # act & assert
-  expect_error(valid_url(url))
-})
-
-
-test_that('valid_url identifies invalid URLs to Elasticsearch rescources - missing port number', {
-  # arrange
-  url <- "http://localhost"
-
-  # act & assert
-  expect_error(valid_url(url))
-})
-
-test_that('valid_url identifies valid ssl URLs to Elasticsearch resources', {
-  #arrange
-  url <- "https://localhost:9200"
-  
-  #act
-  is_valid_url <- valid_url(url)
-  
-  #assert
-  expect_true(is_valid_url)
+  expect_error(valid_connection(url))
 })
 
 

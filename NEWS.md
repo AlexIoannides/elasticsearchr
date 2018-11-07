@@ -1,3 +1,8 @@
+# elasticsearchr 0.2.3
+
+* Refactored `valid_url` with the enhanced `valid_connection` function, based on HTTP requests to the cluster health API.
+
+
 # elasticsearchr 0.2.2
 
 * Added support for HTTPS endpoints.

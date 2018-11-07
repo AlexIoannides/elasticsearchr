@@ -2,7 +2,6 @@
 % Please edit documentation in R/utils.R
 \name{create_bulk_upload_file}
 \alias{create_bulk_upload_file}
-\alias{create_bulk_upload_file}
 \alias{create_bulk_delete_file}
 \title{Create Bulk API data file.}
 \usage{
