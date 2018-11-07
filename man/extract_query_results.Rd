@@ -2,7 +2,6 @@
 % Please edit documentation in R/utils.R
 \name{extract_query_results}
 \alias{extract_query_results}
-\alias{extract_query_results}
 \alias{extract_aggs_results}
 \alias{extract_id_results}
 \title{Elasticsearch HTTP response data extraction functions.}
