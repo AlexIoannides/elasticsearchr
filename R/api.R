@@ -68,7 +68,7 @@ is_elastic_sort <- function(x) inherits(x, "elastic_sort")
 #' }
 elastic <- function(cluster_url, index, doc_type = NULL) {
   stopifnot(is.character(cluster_url), is.character(index), is.character(doc_type) | is.null(doc_type),
-            valid_url(cluster_url))
+            valid_connection(cluster_url))
 
   if (substr(cluster_url, nchar(cluster_url), nchar(cluster_url)) == "/") {
     valid_index_url <- paste0(cluster_url, index)

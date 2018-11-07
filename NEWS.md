@@ -1,6 +1,6 @@
 # elasticsearchr 0.2.3
 
-* Enhanced `valid_url` function to be more robust, by basing it on actual HTTP requests to the cluster.
+* Refactored `valid_url` with the enhanced `valid_connection` function, based on HTTP requests to the cluster health API.
 
 
 # elasticsearchr 0.2.2

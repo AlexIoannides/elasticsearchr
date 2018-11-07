@@ -13,11 +13,12 @@
 # limitations under the License.
 
 
-#' Validate Elasticsearch URL.
+#' Validate healthy Elasticsearch connection.
 #'
-#' Tries to defend against incorrect URLs to Elasticsearch rescources. Requires URLs that point to
-#' master nodes directly - i.e. which return the default Elasticsearch message, "You Know, for
-#' Search".
+#' Validates healthy Elasticsearch connections by attempting to call the cluster healthcheck
+#' endpoint. In doing to, it defends against incorrect URLs to Elasticsearch clusters. Requires
+#' that URLs point directly to a master node - i.e. the endpoint that would return the default
+#' Elasticsearch message, "You Know, for Search", e.g. `http://localhost:9200`.
 #'
 #' @param url The URL to validate.
 #' @return Boolean
@@ -25,26 +26,37 @@
 #' @examples
 #' \dontrun{
 #' url <- "http://localhost:9200"
-#' valid_url(url)
+#' valid_connection(url)
 #' # TRUE
 #'
 #' url <- "http://localhost:9201"
-#' valid_url(url)
-#' # Error: Elasticsearch cluster not accessible at: http://localhost:9201
+#' valid_connection(url)
+#' #  Error: Failed to connect to localhost port 9201: Connection refused
 #' }
-valid_url <- function(url) {
+valid_connection <- function(url) {
+  if (substr(url, nchar(url), nchar(url)) == "/") {
+    healthcheck_endpoint <- paste0(url, "_cluster/health")
+  } else {
+    healthcheck_endpoint <- paste0(url, "/_cluster/health")
+  }
+
   tryCatch(
     {
-      response <- httr::GET(url)
-      if (response$status_code != 200) stop()
+      response <- httr::GET(healthcheck_endpoint)
+      if (response$status_code != 200) {
+        msg <- paste0(healthcheck_endpoint, " does not return cluster health:\n",
+                      httr::content(response, as = "text"))
+        stop(msg, call. = FALSE)
+      }
+
       response_parsed <- httr::content(response, as = "parsed")
-      if (response_parsed$tagline == "You Know, for Search") {
+      if (response_parsed$status != "red") {
         return(TRUE)
       } else {
-        stop()
+        stop("Elasticsearch cluster status is red", call. = FALSE)
       }
     },
-    error = function(e) stop(paste("Elasticsearch cluster not accessible at:", url), call. = FALSE)
+    error = function(e) stop(e$message, call. = FALSE)
   )
 }
 
@@ -70,7 +82,7 @@ valid_url <- function(url) {
 #' [1] 1
 #' }
 elastic_version <- function(url) {
-  valid_url(url)
+  valid_connection(url)
   response <- httr::GET(url)
   check_http_code_throw_error(response)
   version_string <- httr::content(response)$version$number
