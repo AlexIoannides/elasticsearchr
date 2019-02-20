@@ -1,6 +1,6 @@
 # elasticsearchr 0.3.0
 
-* TODO
+* Added support for source filtering with the `select_fields` function.
 
 
 # elasticsearchr 0.2.3
