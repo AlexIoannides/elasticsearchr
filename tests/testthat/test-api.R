@@ -17,6 +17,8 @@ context('api')
 
 
 # ---- classes, methods and predicates ------------------------------------------------------------
+
+
 test_that('elastic objects have the correct classes assigned to them', {
   # skip if on CRAN or Travis
   skip_on_travis()
@@ -208,9 +210,18 @@ test_that('aggs objects generate the correct search API call', {
 })
 
 
-test_that('index_list objects have the correct classes assigned to them', {
+test_that('list_indices objects have the correct classes assigned to them', {
   # act
-  es_info <- index_list()
+  es_info <- list_indices()
+
+  # assert
+  expect_identical(class(es_info), c("elastic_info", "elastic_api", "elastic"))
+})
+
+
+test_that('list_fields objects have the correct classes assigned to them', {
+  # act
+  es_info <- list_fields()
 
   # assert
   expect_identical(class(es_info), c("elastic_info", "elastic_api", "elastic"))
@@ -220,7 +231,7 @@ test_that('index_list objects have the correct classes assigned to them', {
 # ---- operators ----------------------------------------------------------------------------------
 
 
-test_that('%info% index_list() returns a list of all available indices', {
+test_that('%info% list_indices() returns a list of all available indices', {
   # skip if on CRAN or Travis
   skip_on_travis()
   skip_on_cran()
@@ -229,10 +240,28 @@ test_that('%info% index_list() returns a list of all available indices', {
   load_test_data()
 
   # act
-  info_results <- elastic("http://localhost:9200", "iris", "data") %info% index_list()
+  info_results <- elastic("http://localhost:9200", "iris", "data") %info% list_indices()
 
   # assert
   expect_equal(info_results, "iris")
+  delete_test_data()
+})
+
+
+test_that('%info% list_fields() returns a list of all fields in an index', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
+  # arrange
+  load_test_data()
+
+  # act
+  info_results <- elastic("http://localhost:9200", "iris", "data") %info% list_fields()
+
+  # assert
+  expected_fields <- c("petal_length", "petal_width", "sepal_length", "sepal_width", "sort_key", "species")
+  expect_equal(info_results, expected_fields)
   delete_test_data()
 })
 

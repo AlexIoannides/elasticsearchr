@@ -2,7 +2,8 @@
 
 * Added support for source filtering with the `select_fields` function.
 * Added the `%info%` operator to be used for retreiving cluster and index information.
-* Added the `list_index` function for retrieving a list of all available indices.
+* Added the `list_indices` function for retrieving a list of all available indices.
+* Added the `list_fields` function for retrieving a list of all available indices.
 
 
 # elasticsearchr 0.2.3

@@ -173,15 +173,38 @@ aggs <- function(json) {
 }
 
 
-#' Define Elasticsearch indices information
+
+#' List of fields in index information.
+#' @export
+#'
+#' @return An \code{elastic_info} object.
+#'
+#' @examples
+#' list_fields()
+list_fields <- function() {
+  endpoint <- "/_mapping"
+
+  process_response <- function(response) {
+    index_mapping <- httr::content(response, as = "parsed")
+    fields <- names(index_mapping[[1]]$mappings$data$properties)
+    fields
+  }
+
+  structure(list("endpoint" = endpoint, "process_response" = process_response),
+            class = c("elastic_info", "elastic_api", "elastic"))
+}
+
+
+#' List of indices in cluster information.
 #'
 #' @export
 #'
 #' @return An \code{elastic_info} object.
 #'
-#'
-index_list <- function() {
-  endpoint <- "/*"
+#' @examples
+#' list_indices()
+list_indices <- function() {
+  endpoint <- "/_mapping"
   process_response <- function(response) names(httr::content(response, as = "parsed"))
   structure(list("endpoint" = endpoint, "process_response" = process_response),
             class = c("elastic_info", "elastic_api", "elastic"))
@@ -204,7 +227,8 @@ index_list <- function() {
 #'
 #' @examples
 #' \dontrun{
-#' elastic("http://localhost:9200", "iris", "data") %info% index_list()
+#' elastic("http://localhost:9200", "iris", "data") %info% list_indices()
+#' elastic("http://localhost:9200", "iris", "data") %info% list_fields()
 #' }
 `%info%` <- function(rescource, info) UseMethod("%info%")
 
