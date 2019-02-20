@@ -208,7 +208,35 @@ test_that('aggs objects generate the correct search API call', {
 })
 
 
+test_that('index_list objects have the correct classes assigned to them', {
+  # act
+  es_info <- index_list()
+
+  # assert
+  expect_identical(class(es_info), c("elastic_info", "elastic_api", "elastic"))
+})
+
+
 # ---- operators ----------------------------------------------------------------------------------
+
+
+test_that('%info% index_list() returns a list of all available indices', {
+  # skip if on CRAN or Travis
+  skip_on_travis()
+  skip_on_cran()
+
+  # arrange
+  load_test_data()
+
+  # act
+  info_results <- elastic("http://localhost:9200", "iris", "data") %info% index_list()
+
+  # assert
+  expect_equal(info_results, "iris")
+  delete_test_data()
+})
+
+
 test_that('%index% correctly indexes a large (>10mb single chunk) data frame', {
   # skip if on CRAN or Travis
   skip_on_travis()

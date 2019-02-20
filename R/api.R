@@ -53,6 +53,10 @@ is_elastic_sort <- function(x) inherits(x, "elastic_sort")
 #' @rdname elastic_predicates
 is_elastic_source_filter <- function(x) inherits(x, "elastic_source_filter")
 
+#' @export
+#' @rdname elastic_predicates
+is_elastic_info <- function(x) inherits(x, "elastic_info")
+
 
 #' elastic_resource class constructor.
 #'
@@ -139,7 +143,6 @@ sort_on <- function(json) {
 #'
 #' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html}
 #'
-#' @examples
 select_fields <- function(json) {
   stopifnot(valid_json(json))
   api_call <- paste0('"_source": ', json)
@@ -170,7 +173,48 @@ aggs <- function(json) {
 }
 
 
+#' Define Elasticsearch indices information
+#'
+#' @export
+#'
+#' @return An \code{elastic_info} object.
+#'
+#'
+index_list <- function() {
+  endpoint <- "/*"
+  process_response <- function(response) names(httr::content(response, as = "parsed"))
+  structure(list("endpoint" = endpoint, "process_response" = process_response),
+            class = c("elastic_info", "elastic_api", "elastic"))
+}
+
+
 # ---- operators ----------------------------------------------------------------------------------
+
+
+#' Get cluster and index (meta) data.
+#'
+#' An operator to be used with requests for information
+#'
+#' @export
+#'
+#' @param rescource An \code{elastic_rescource} object that contains the information on the
+#' Elasticsearch cluster, index and document type, where the indexed data will reside. If this does
+#' not already exist, it will be created automatically.
+#' @param info \code{elastic_info} object.
+#'
+#' @examples
+#' \dontrun{
+#' elastic("http://localhost:9200", "iris", "data") %info% index_list()
+#' }
+`%info%` <- function(rescource, info) UseMethod("%info%")
+
+#' @export
+`%info%.elastic_rescource` <- function(rescource, info) {
+  stopifnot(is_elastic_rescource(rescource), is_elastic_info(info), !is.null(rescource$doc_type))
+  api_call <- paste0(rescource$cluster_url, info$endpoint)
+  response <- httr::GET(api_call)
+  info$process_response(response)
+}
 
 
 #' Index a data frame.
