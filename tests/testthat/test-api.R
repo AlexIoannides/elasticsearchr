@@ -394,7 +394,6 @@ test_that('we can query using the %search% operator and return a subset of field
 })
 
 
-### WIP
 test_that('we can query using the %search% operator and return a sorted subset of fields', {
   # skip if on CRAN or Travis
   skip_on_travis()
@@ -423,7 +422,6 @@ test_that('we can query using the %search% operator and return a sorted subset o
   expect_equal(query_results, iris_data_sorted)
   delete_test_data()
 })
-### WIP
 
 
 test_that('we can use bucket aggregations using the %search% operator', {
