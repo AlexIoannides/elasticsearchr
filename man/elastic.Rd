@@ -2,7 +2,7 @@
 % Please edit documentation in R/api.R
 \name{elastic}
 \alias{elastic}
-\title{elastic_rescource class constructor.}
+\title{elastic_resource class constructor.}
 \usage{
 elastic(cluster_url, index, doc_type = NULL)
 }

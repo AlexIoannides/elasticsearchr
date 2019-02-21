@@ -234,7 +234,7 @@ list_indices <- function() {
 
 #' @export
 `%info%.elastic_rescource` <- function(rescource, info) {
-  stopifnot(is_elastic_rescource(rescource), is_elastic_info(info), !is.null(rescource$doc_type))
+  stopifnot(is_elastic_rescource(rescource), is_elastic_info(info))
   api_call <- paste0(rescource$cluster_url, info$endpoint)
   response <- httr::GET(api_call)
   info$process_response(response)

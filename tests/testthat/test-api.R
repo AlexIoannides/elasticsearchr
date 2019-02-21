@@ -402,7 +402,7 @@ test_that('we can query using the %search% operator and return all documents', {
 })
 
 
-test_that('we can query using the %search% operator on a subset of all documents', {
+test_that('we can query using the %search% operator and return documents sorted', {
   # skip if on CRAN or Travis
   skip_on_travis()
   skip_on_cran()
