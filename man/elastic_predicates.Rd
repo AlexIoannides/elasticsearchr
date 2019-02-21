@@ -8,6 +8,8 @@
 \alias{is_elastic_query}
 \alias{is_elastic_aggs}
 \alias{is_elastic_sort}
+\alias{is_elastic_source_filter}
+\alias{is_elastic_info}
 \title{elasticsearchr predicate functions.}
 \usage{
 is_elastic(x)
@@ -21,6 +23,10 @@ is_elastic_query(x)
 is_elastic_aggs(x)
 
 is_elastic_sort(x)
+
+is_elastic_source_filter(x)
+
+is_elastic_info(x)
 }
 \arguments{
 \item{x}{An elasticsearchr object.}

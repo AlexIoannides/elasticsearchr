@@ -49,8 +49,16 @@ is_elastic_aggs <- function(x) inherits(x, "elastic_aggs")
 #' @rdname elastic_predicates
 is_elastic_sort <- function(x) inherits(x, "elastic_sort")
 
+#' @export
+#' @rdname elastic_predicates
+is_elastic_source_filter <- function(x) inherits(x, "elastic_source_filter")
 
-#' elastic_rescource class constructor.
+#' @export
+#' @rdname elastic_predicates
+is_elastic_info <- function(x) inherits(x, "elastic_info")
+
+
+#' elastic_resource class constructor.
 #'
 #' Objects of this class contain all of the information required to locate documents in an
 #' Elasticsearch cluster.
@@ -126,6 +134,23 @@ sort_on <- function(json) {
 }
 
 
+#' Define Elasticsearch query source filter.
+#'
+#' @export
+#'
+#' @param json JSON object describing the aggregation that needs to be executed.
+#' @return An \code{elastic_source_filter} object.
+#'
+#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html}
+#'
+select_fields <- function(json) {
+  stopifnot(valid_json(json))
+  api_call <- paste0('"_source": ', json)
+  structure(list("api_call" = api_call),
+            class = c("elastic_source_filter", "elastic_api", "elastic"))
+}
+
+
 #' Define Elasticsearch aggregation.
 #'
 #' @export
@@ -148,7 +173,72 @@ aggs <- function(json) {
 }
 
 
+
+#' List of fields in index information.
+#' @export
+#'
+#' @return An \code{elastic_info} object.
+#'
+#' @examples
+#' list_fields()
+list_fields <- function() {
+  endpoint <- "/_mapping"
+
+  process_response <- function(response) {
+    index_mapping <- httr::content(response, as = "parsed")
+    fields <- names(index_mapping[[1]]$mappings$data$properties)
+    fields
+  }
+
+  structure(list("endpoint" = endpoint, "process_response" = process_response),
+            class = c("elastic_info", "elastic_api", "elastic"))
+}
+
+
+#' List of indices in cluster information.
+#'
+#' @export
+#'
+#' @return An \code{elastic_info} object.
+#'
+#' @examples
+#' list_indices()
+list_indices <- function() {
+  endpoint <- "/_mapping"
+  process_response <- function(response) names(httr::content(response, as = "parsed"))
+  structure(list("endpoint" = endpoint, "process_response" = process_response),
+            class = c("elastic_info", "elastic_api", "elastic"))
+}
+
+
 # ---- operators ----------------------------------------------------------------------------------
+
+
+#' Get cluster and index (meta) data.
+#'
+#' An operator to be used with requests for information
+#'
+#' @export
+#'
+#' @param rescource An \code{elastic_rescource} object that contains the information on the
+#' Elasticsearch cluster, index and document type, where the indexed data will reside. If this does
+#' not already exist, it will be created automatically.
+#' @param info \code{elastic_info} object.
+#'
+#' @examples
+#' \dontrun{
+#' elastic("http://localhost:9200", "iris", "data") %info% list_indices()
+#' elastic("http://localhost:9200", "iris", "data") %info% list_fields()
+#' }
+`%info%` <- function(rescource, info) UseMethod("%info%")
+
+#' @export
+`%info%.elastic_rescource` <- function(rescource, info) {
+  stopifnot(is_elastic_rescource(rescource), is_elastic_info(info))
+  api_call <- paste0(rescource$cluster_url, info$endpoint)
+  response <- httr::GET(api_call)
+  info$process_response(response)
+}
 
 
 #' Index a data frame.
@@ -353,19 +443,57 @@ aggs <- function(json) {
 #' all_docs + sort_by_sepal_width
 `+.elastic_api` <- function(x, y) {
   stopifnot(is_elastic_query(x) & is_elastic_aggs(y) |
-              is_elastic_aggs(x) & is_elastic_query(y) |
-              is_elastic_query(x) & is_elastic_sort(y) |
-              is_elastic_sort(x) & is_elastic_query(y))
+            is_elastic_aggs(x) & is_elastic_query(y) |
+            is_elastic_query(x) & is_elastic_sort(y) |
+            is_elastic_sort(x) & is_elastic_query(y) |
+            is_elastic_source_filter(x) & is_elastic_query(y) |
+            is_elastic_query(x) & is_elastic_source_filter(y) |
+            is_elastic_source_filter(x) & is_elastic_sort(y) |
+            is_elastic_sort(x) & is_elastic_source_filter(y) |
+            is_elastic_query(x) & is_elastic_query(y))
 
   if (is_elastic_query(x) & is_elastic_sort(y) | is_elastic_query(y) & is_elastic_sort(x)) {
-    query_size <- if (is_elastic_query(x)) x$size else y$size
-    api_call <- paste0(x$api_call, ',', y$api_call)
-    structure(list("api_call" = api_call, "size" = query_size),
+    query <- if (is_elastic_query(x)) x else y
+    sort <- if (is_elastic_sort(x)) x else y
+    combined_api_call <- paste0(query$api_call, ',', sort$api_call)
+    structure(list("api_call" = combined_api_call, "size" = query$size),
+              class = c("elastic_query", "elastic_api", "elastic"))
+
+  } else if (is_elastic_source_filter(x) & is_elastic_query(y) |
+             is_elastic_query(x) & is_elastic_source_filter(y)) {
+    query <- if (is_elastic_query(x)) x else y
+    source_filter <- if (is_elastic_source_filter(x)) x else y
+    combined_api_call <- paste0(source_filter$api_call, ',', query$api_call)
+    structure(list("api_call" = combined_api_call, "size" = query$size),
+              class = c("elastic_query", "elastic_api", "elastic"))
+
+  } else if (is_elastic_source_filter(x) & is_elastic_sort(y) |
+             is_elastic_sort(x) & is_elastic_source_filter(y)) {
+    sort <- if (is_elastic_sort(x)) x else y
+    source_filter <- if (is_elastic_source_filter(x)) x else y
+    combined_api_call <- paste0(source_filter$api_call, ',', sort$api_call)
+    structure(list("api_call" = combined_api_call),
+              class = c("elastic_query", "elastic_api", "elastic"))
+
+  } else if (is_elastic_query(x) & is_elastic_query(y)) {
+    if (!is.null(x$size)) {
+      query_body <- x
+    } else if (!is.null(y$size)) {
+      query_body <- y
+    } else {
+      stop("no main query body in left or right operands", call. = FALSE)
+    }
+
+    query_src_filter_sort <- if (is.null(x$size)) x else y
+    combined_api_call <- paste0(query_body$api_call, ',', query_src_filter_sort$api_call)
+    structure(list("api_call" = combined_api_call, "size" = query_body$size),
               class = c("elastic_query", "elastic_api", "elastic"))
 
   } else if (is_elastic_query(x) & is_elastic_aggs(y) | is_elastic_query(y) & is_elastic_aggs(x)) {
-    combined_call <- paste0(x$api_call, ',', y$api_call)
-    structure(list("api_call" = combined_call, "size" = 0),
+    query <- if (is_elastic_query(x)) x else y
+    aggs <- if (is_elastic_aggs(x)) x else y
+    combined_api_call <- paste0(query$api_call, ',', aggs$api_call)
+    structure(list("api_call" = combined_api_call, "size" = 0),
               class = c("elastic_aggs", "elastic_api", "elastic"))
   }
 }
@@ -383,6 +511,7 @@ aggs <- function(json) {
 #' all_docs <- query('{"match_all": {}}')
 #' print(all_docs)
 print.elastic_api <- function(x, ...) {
-  complete_json <- paste0('{', '"size": ', x$size, ', ',x$api_call, '}')
+  size_call <- if (!is.null(x$size)) paste0('"size": ', x$size, ', ') else ''
+  complete_json <- paste0('{', size_call, x$api_call, '}')
   jsonlite::prettify(complete_json)
 }
