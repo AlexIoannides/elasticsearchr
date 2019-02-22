@@ -305,7 +305,7 @@ elastic("http://localhost:9200", "iris") %info% list_fields()
 A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and `jsonlite` packages that `elasticsearchr` leans upon _heavily_. And, to the other contributors and supporters - your efforts are greatly appreciated!
 
 
-[esr_img]: https://alexioannides.files.wordpress.com/2016/12/elasticsearchr2.png "Elasticsearchr"
+[esr_img]: https://alexioannides.github.io/images/r/elasticsearchr/elasticsearchr2.png "Elasticsearchr"
 
 [elastic]: https://www.elastic.co "Elastic corp."
 
@@ -335,7 +335,7 @@ A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and
 
 [json]: https://en.wikipedia.org/wiki/JSON "JSON"
 
-[basic_concepts]: https://www.elastic.co/guide/en/elasticsearch/reference/current/_basic_concepts.html "Basic Concepts"
+[basic_concepts]: https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-concepts.html "Basic Concepts"
 
 [source_filtering]: https://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-source-filtering.html "Source Filters"
 
