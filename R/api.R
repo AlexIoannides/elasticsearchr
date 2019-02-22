@@ -123,7 +123,7 @@ query <- function(json, size = 0) {
 #' @param json JSON object describing the sorting required on the query results.
 #' @return An \code{elastic_sort} object.
 #'
-#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/5.0/search-request-sort.html}
+#' @seealso \url{https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html}
 #'
 #' @examples
 #' sort_by_key <- sort_on('[{"sort_key": {"order": "asc"}}]')
