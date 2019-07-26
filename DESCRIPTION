@@ -15,10 +15,11 @@ BugReports: https://github.com/alexioannides/elasticsearchr/issues
 LazyData: TRUE
 Imports:
     httr,
-    jsonlite
+    jsonlite,
+    dplyr
 Suggests:
     knitr,
     testthat,
     rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
