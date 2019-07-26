@@ -1,3 +1,8 @@
+# elasticsearchr 0.3.1
+
+* Changed back-end to use dplyr::bind_rows as opposed to do.call(rbind) to handle NAs consistently.
+
+
 # elasticsearchr 0.3.0
 
 * Added support for source filtering with the `select_fields` function.

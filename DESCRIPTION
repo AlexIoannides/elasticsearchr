@@ -1,8 +1,8 @@
 Package: elasticsearchr
 Type: Package
-Version: 0.3.0
+Version: 0.3.1
 Title: A Lightweight Interface for Interacting with Elasticsearch from R
-Date: 2019-02-22
+Date: 2019-07-26
 Author: Alex Ioannides
 Maintainer: Alex Ioannides <alex.ioannides@yahoo.co.uk>
 Description: A lightweight R interface to 'Elasticsearch' - a NoSQL search-engine and 
