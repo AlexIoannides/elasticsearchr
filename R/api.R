@@ -1,4 +1,4 @@
-# Copyright 2016 Alex Ioannides
+# Copyright 2016-2019 Alex Ioannides
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -346,7 +346,7 @@ list_indices <- function() {
       message(paste0("... ", rescource$index, " has been deleted"))
     } else {
       api_call_payload <- '{"query": {"match_all": {}}}'
-      doc_type_ids <- as.vector(scroll_search(rescource, api_call_payload, extract_id_results))
+      doc_type_ids <- scroll_search(rescource, api_call_payload, extract_id_results)$id
       metadata <- create_metadata("delete", rescource$index, rescource$doc_type, doc_type_ids)
       deletions_file <- create_bulk_delete_file(metadata)
       response <- httr::PUT(url = rescource$cluster_url,

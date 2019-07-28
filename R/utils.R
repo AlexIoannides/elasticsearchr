@@ -1,4 +1,4 @@
-# Copyright 2016 Alex Ioannides
+# Copyright 2016-2019 Alex Ioannides
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -401,7 +401,7 @@ scroll_search <- function(rescource, api_call_payload, extract_function = extrac
     }
   }
 
-  do.call(rbind, scroll_results)
+  as.data.frame(dplyr::bind_rows(scroll_results), stringsAsFactors = FALSE)
 }
 
 
@@ -437,9 +437,9 @@ extract_aggs_results <- function(response) {
 
 #' @rdname extract_query_results
 extract_id_results <- function(response) {
-  df <- jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_id`
-  if (length(df) == 0) stop("no ids returned")
-  df
+  ids <- jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_id`
+  if (length(ids) == 0) stop("no ids returned")
+  data.frame(id = ids)
 }
 
 
