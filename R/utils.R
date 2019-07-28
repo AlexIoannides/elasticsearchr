@@ -437,9 +437,9 @@ extract_aggs_results <- function(response) {
 
 #' @rdname extract_query_results
 extract_id_results <- function(response) {
-  df <- jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_id`
-  if (length(df) == 0) stop("no ids returned")
-  df
+  ids <- jsonlite::fromJSON(httr::content(response, as = 'text'))$hits$hits$`_id`
+  if (length(ids) == 0) stop("no ids returned")
+  data.frame(id = ids)
 }
 
 
