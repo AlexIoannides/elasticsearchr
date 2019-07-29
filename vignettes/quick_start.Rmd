@@ -335,8 +335,8 @@ A big thank you to Hadley Wickham and Jeroen Ooms, the authors of the `httr` and
 
 [json]: https://en.wikipedia.org/wiki/JSON "JSON"
 
-[basic_concepts]: https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started-concepts.html "Basic Concepts"
+[basic_concepts]: https://www.elastic.co/guide/en/elasticsearch/reference/current/elasticsearch-intro.html "Basic Concepts"
 
-[source_filtering]: https://www.elastic.co/guide/en/elasticsearch/reference/master/search-request-source-filtering.html "Source Filters"
+[source_filtering]: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html "Source Filters"
 
 [es_five_mappings]: https://www.elastic.co/guide/en/elasticsearch/reference/5.0/breaking_50_mapping_changes.html "Text fields in Elasticsearch 5.x"
